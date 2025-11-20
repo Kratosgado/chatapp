@@ -24,6 +24,10 @@ coverage
 *.sln
 *.sw?
 
+# auto -generated type declarations
+auto-imports.d.ts
+components.d.ts
+
 *.tsbuildinfo
 
 .eslintcache
