@@ -2,11 +2,11 @@
   "name": "chatapp",
   "private": true,
   "scripts": {
-    "start:backend": "cd backend && ./gradlew bootRun",
+    "dev:backend": "cd backend && ./gradlew bootRun",
     "build:backend": "cd backend && ./gradlew build",
-    "start:frontend": "cd frontend && pnpm dev",
+    "dev:frontend": "cd frontend && pnpm dev",
     "build:frontend": "cd frontend && pnpm build",
-    "dev": "concurrently \"pnpm run start:backend\" \"pnpm run start:frontend\"",
+    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
     "test:backend": "cd backend && ./gradlew test",
     "test:frontend": "cd frontend && pnpm test",
     "test": "concurrently \"pnpm run test:backend\" \"pnpm run test:frontend\""
