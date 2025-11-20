@@ -8,10 +8,11 @@ import ui from "@nuxt/ui/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueDevTools(), tailwindcss(), ui()],
+  plugins: [vue(), tailwindcss(), ui({}), vueDevTools()],
   server: {
     port: 3000,
   },
+  optimizeDeps: { include: ["@vueuse/core", "vue"] },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

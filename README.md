@@ -1,4 +1,4 @@
-# Demo Chat App (Spring Boot + Vue) For Learning Purposes
+# Demo Chat App (Spring Boot + Vue) For Learning Purpose
 
 ## Backend features
 
