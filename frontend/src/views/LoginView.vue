@@ -49,8 +49,8 @@ async function onSubmit() {
 </script>
 
 <template>
-  <UContainer class="h-full w-full">
-    <UCard class="w-full max-w-md">
+  <UContainer class="flex items-center justify-center">
+    <UCard class="w-full max-w-md self-center">
       <template #header>
         <div class="text-center">
           <h1 class="text-2xl font-bold text-gray-900">Chat App</h1>
