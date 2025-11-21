@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kratosgado.chatapp.auth.dto.RegisterDto;
+import com.kratosgado.chatapp.users.User;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -30,10 +31,8 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<?> register(@RequestBody @Valid RegisterDto dto, HttpServletResponse res) {
+  public User register(@RequestBody @Valid RegisterDto dto, HttpServletResponse res) {
     logger.info("registering user {}", dto);
-    logger.info("registering user");
-    authService.register(dto, res);
-    return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+    return authService.register(dto, res);
   }
 }

@@ -1,5 +1,4 @@
-
-package com.kratosgado.chatapp.configs;
+package com.kratosgado.chatapp.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +19,8 @@ public class GloabalExceptionHandler {
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<?> handleOtherErrors(Exception ex) {
-    return ResponseEntity.status(500).body(ex.getMessage());
+  public ResponseEntity<?> handleApiExceptions(ApiException ex) {
+    return ResponseEntity.status(ex.getStatus()).body(new ApiResponse(ex.getStatus(), ex.getMessage()));
   }
 
 }
