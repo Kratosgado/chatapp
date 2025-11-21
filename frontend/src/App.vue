@@ -13,7 +13,11 @@ onBeforeMount(() => {
 
 <template>
   <UApp>
-    <UHeader />
+    <UHeader>
+      <template #title>
+        <ULink to="/" class="text-2xl font-bold">Demo Chat App</ULink>
+      </template>
+    </UHeader>
     <UMain>
       <RouterView />
     </UMain>

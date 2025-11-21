@@ -1,67 +1,69 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { z } from 'zod'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { z } from "zod";
 
-const router = useRouter()
-const loading = ref(false)
-const error = ref('')
+const router = useRouter();
+const loading = ref(false);
+const error = ref("");
 
 const registerSchema = z
   .object({
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
+    path: ["confirmPassword"],
+  });
 
-type RegisterForm = z.infer<typeof registerSchema>
+type RegisterForm = z.infer<typeof registerSchema>;
 
 const state = ref<RegisterForm>({
-  username: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-})
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+});
 
 async function onSubmit() {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = "";
 
   try {
-    const response = await fetch('http://localhost:8080/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("http://localhost:8080/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         username: state.value.username,
         email: state.value.email,
         password: state.value.password,
       }),
-    })
+    });
 
     if (!response.ok) {
-      throw new Error('Registration failed')
+      throw new Error("Registration failed");
     }
 
-    const data = await response.json()
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+    const data = await response.json();
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-    router.push('/chats')
+    router.push("/chats");
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Registration failed'
+    error.value = err instanceof Error ? err.message : "Registration failed";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
+  <div
+    class="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 to-slate-800"
+  >
     <UCard class="w-full max-w-md">
       <template #header>
         <div class="text-center">
@@ -71,12 +73,23 @@ async function onSubmit() {
       </template>
 
       <div class="space-y-4">
-        <UAlert v-if="error" icon="i-lucide-alert-circle" color="red" :title="error" />
+        <UAlert
+          v-if="error"
+          icon="i-lucide-alert-circle"
+          color="red"
+          :title="error"
+        />
 
-        <UForm :schema="registerSchema" :state="state" @submit="onSubmit" class="space-y-4">
+        <UForm
+          :schema="registerSchema"
+          :state="state"
+          @submit="onSubmit"
+          class="space-y-4"
+        >
           <UFormField label="Username" name="username">
             <UInput
               v-model="state.username"
+              class="w-full"
               placeholder="johndoe"
               :disabled="loading"
             />
@@ -86,6 +99,7 @@ async function onSubmit() {
             <UInput
               v-model="state.email"
               type="email"
+              class="w-full"
               placeholder="you@example.com"
               :disabled="loading"
             />
@@ -96,6 +110,7 @@ async function onSubmit() {
               v-model="state.password"
               type="password"
               placeholder="••••••••"
+              class="w-full"
               :disabled="loading"
             />
           </UFormField>
@@ -104,19 +119,24 @@ async function onSubmit() {
             <UInput
               v-model="state.confirmPassword"
               type="password"
+              class="w-full"
               placeholder="••••••••"
               :disabled="loading"
             />
           </UFormField>
 
-          <UButton type="submit" block :loading="loading">Create Account</UButton>
+          <UButton type="submit" block :loading="loading"
+            >Create Account</UButton
+          >
         </UForm>
       </div>
 
       <template #footer>
         <p class="text-center text-sm text-gray-500">
           Already have an account?
-          <ULink to="/login" class="text-primary-500 hover:text-primary-600 font-semibold"
+          <ULink
+            to="/login"
+            class="text-primary-500 hover:text-primary-600 font-semibold"
             >Sign in</ULink
           >
         </p>

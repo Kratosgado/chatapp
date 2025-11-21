@@ -49,8 +49,10 @@ async function onSubmit() {
 </script>
 
 <template>
-  <UContainer class="flex items-center justify-center">
-    <UCard class="w-full max-w-md self-center">
+  <UContainer
+    class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+  >
+    <UCard class="w-full max-w-md">
       <template #header>
         <div class="text-center">
           <h1 class="text-2xl font-bold text-gray-900">Chat App</h1>
@@ -76,6 +78,7 @@ async function onSubmit() {
             <UInput
               v-model="state.email"
               type="email"
+              class="w-full"
               placeholder="you@example.com"
               :disabled="loading"
             />
@@ -85,6 +88,7 @@ async function onSubmit() {
             <UInput
               v-model="state.password"
               type="password"
+              class="w-full"
               placeholder="••••••••"
               :disabled="loading"
             />
