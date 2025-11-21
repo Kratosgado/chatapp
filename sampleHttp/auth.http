@@ -7,11 +7,11 @@
 
 # @name register
 
-POST {{host}}/auth/register HTTP/1.1
+POST {{host}}/api/auth/register HTTP/1.1
 
 {
   "confirmPassword": "test",
-  "email": "test@test.com",
+ U"email": "test@test.com",
   "password": "test",
   "username": "test"
 }
@@ -25,3 +25,8 @@ POST {{host}}/api/auth/login HTTP/1.1
   "password": "",
   "username": ""
 }
+
+
+### 
+
+GET {{host}}/ HTTP/1.1
