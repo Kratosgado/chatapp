@@ -1,0 +1,27 @@
+### 
+
+@host = http://localhost:8080
+
+
+### 
+
+# @name register
+
+POST {{host}}/auth/register HTTP/1.1
+
+{
+  "confirmPassword": "test",
+  "email": "test@test.com",
+  "password": "test",
+  "username": "test"
+}
+
+
+### 
+
+POST {{host}}/api/auth/login HTTP/1.1
+
+{
+  "password": "",
+  "username": ""
+}

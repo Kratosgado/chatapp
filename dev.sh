@@ -22,7 +22,8 @@ build:frontend)
   cd frontend && pnpm build
   ;;
 dev)
-  concurrently "pnpm run dev:backend" "pnpm run dev:frontend"
+  cd backend && ./gradlew bootRun &
+  cd frontend && pnpm dev
   ;;
 test:backend)
   cd backend && ./gradlew test
@@ -31,7 +32,8 @@ test:frontend)
   cd frontend && pnpm test
   ;;
 test)
-  concurrently "pnpm run test:backend" "pnpm run test:frontend"
+  cd backend && ./gradlew test &
+  cd frontend && pnpm test
   ;;
 *)
   echo "Usage: $0 {start|exit}"
