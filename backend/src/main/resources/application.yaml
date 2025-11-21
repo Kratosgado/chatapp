@@ -6,9 +6,9 @@ spring:
     name: chatapp
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/chatapp
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:chatapp}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:postgres}
 
   jpa:
     hibernate:
@@ -23,3 +23,7 @@ spring:
     livereload:
       enabled: true
       port: 35729
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY:940ff3dce8ce688ebb9cd5c866cedd3b3d423d5ca31342d06402569949991832}
+    expiration-time: ${JWT_EXPIRATION_TIME:36000000}

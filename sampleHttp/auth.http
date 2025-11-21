@@ -10,10 +10,10 @@
 POST {{host}}/api/auth/register HTTP/1.1
 
 {
-  "confirmPassword": "test",
- U"email": "test@test.com",
-  "password": "test",
-  "username": "test"
+  "confirmPassword": "kratosgado",
+  "email": "kratosgado@gmail.com",
+  "name": "Kratosgado",
+  "password": "kratosgado"
 }
 
 

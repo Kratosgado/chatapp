@@ -1,15 +1,27 @@
 package com.kratosgado.chatapp.auth;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kratosgado.chatapp.auth.dto.RegisterDto;
+
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
   private final Logger logger = LoggerFactory.getLogger(AuthController.class);
+  private final AuthService authService;
 
   @PostMapping("/login")
   public String login() {
@@ -18,8 +30,10 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public String register() {
-    logger.info("logging in user");
-    return "register";
+  public ResponseEntity<?> register(@RequestBody @Valid RegisterDto dto, HttpServletResponse res) {
+    logger.info("registering user {}", dto);
+    logger.info("registering user");
+    authService.register(dto, res);
+    return ResponseEntity.ok(Map.of("message", "User registered successfully"));
   }
 }
