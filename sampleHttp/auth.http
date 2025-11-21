@@ -11,7 +11,7 @@ POST {{host}}/api/auth/register HTTP/1.1
 
 {
   "confirmPassword": "kratosgado",
-  "email": "kratosgado@gmail.com",
+  "email": "katosgado@gmail.com",
   "name": "Kratosgado",
   "password": "kratosgado"
 }
