@@ -5,18 +5,9 @@ import { useFriendsStore } from "@/stores/friends";
 import { useChatsStore } from "@/stores/chats";
 import { storeToRefs } from "pinia";
 
-const props = defineProps<{
-  modelValue: boolean;
-}>();
-
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
 }>();
-
-const isOpen = computed({
-  get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
-});
 
 const friendsStore = useFriendsStore();
 const chatsStore = useChatsStore();
@@ -43,7 +34,6 @@ onMounted(() => {
 async function createChat() {
   try {
     await chatsStore.create(state.value.users, state.value.groupName);
-    isOpen.value = false;
     state.value = { type: "direct", users: [], groupName: "" };
     // Ideally select the new chat
     chatsStore.fetchChats();
@@ -54,26 +44,10 @@ async function createChat() {
 </script>
 
 <template>
-  <UModal v-model="isOpen">
+  <UModal>
+    <UButton icon="i-heroicons-plus" color="gray" variant="ghost" size="sm" />
     <template #content>
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3
-              class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-            >
-              Start New Chat
-            </h3>
-            <UButton
-              color="gray"
-              variant="ghost"
-              icon="i-heroicons-x-mark-20-solid"
-              class="-my-1"
-              @click="isOpen = false"
-            />
-          </div>
-        </template>
-
+      <UCard title="Start New Chat">
         <UForm
           :schema="chatSchema"
           :state="state"
@@ -120,9 +94,7 @@ async function createChat() {
           </UFormField>
 
           <div class="flex justify-end gap-2">
-            <UButton color="gray" variant="soft" @click="isOpen = false"
-              >Cancel</UButton
-            >
+            <UButton color="gray" variant="soft">Cancel</UButton>
             <UButton type="submit" color="primary">Create</UButton>
           </div>
         </UForm>

@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
 import ChatList from "./chat/ChatList.vue";
 import FriendList from "./friends/FriendList.vue";
-import type { TabsItem } from "@nuxt/ui";
+import type { DropdownMenuItem, TabsItem } from "@nuxt/ui";
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
@@ -71,7 +71,7 @@ function handleLogout() {
               {
                 label: 'Logout',
                 icon: 'i-heroicons-arrow-right-on-rectangle',
-                click: handleLogout,
+                onSelect: handleLogout,
               },
             ],
           ]"
