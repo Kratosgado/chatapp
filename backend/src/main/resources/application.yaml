@@ -1,3 +1,7 @@
+logging:
+  level:
+    com.kratosgado.chatapp: DEBUG
+    org.springframework.web: INFO
 server:
   port: 8080
 

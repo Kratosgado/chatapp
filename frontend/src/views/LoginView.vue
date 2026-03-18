@@ -3,75 +3,102 @@ import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
+import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const loading = ref(false);
-const error = ref("");
+const toast = useToast();
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
-const state = reactive<LoginForm>({
-  email: "",
-  password: "",
-});
-
-async function onSubmit() {
+async function onSubmit({ data }: FormSubmitEvent<Schema>) {
   loading.value = true;
-  error.value = "";
 
   try {
-    await authStore.login(state.email, state.password);
+    await authStore.login(data.email, data.password);
     router.push("/chats");
   } catch (err: any) {
-    error.value = err.response?.data?.message || err.message || "Login failed";
+    toast.add({
+      title: "Login failed",
+      description: err.response?.data?.message || err.message,
+    });
   } finally {
     loading.value = false;
   }
 }
+
+const fields: AuthFormField[] = [
+  {
+    name: "email",
+    type: "email",
+    label: "Email",
+    placeholder: "Enter your email",
+    required: true,
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    placeholder: "Enter your password",
+    required: true,
+  },
+  {
+    name: "remember",
+    label: "Remember me",
+    type: "checkbox",
+  },
+];
+
+const providers = [
+  {
+    label: "Google",
+    icon: "i-simple-icons-google",
+    onClick: () => {
+      toast.add({ title: "Google", description: "Login with Google" });
+    },
+  },
+  {
+    label: "GitHub",
+    icon: "i-simple-icons-github",
+    onClick: () => {
+      toast.add({ title: "GitHub", description: "Login with GitHub" });
+    },
+  },
+];
+
+const schema = z.object({
+  email: z.email("Invalid email"),
+  password: z
+    .string("Password is required")
+    .min(8, "Must be at least 8 characters"),
+});
+
+type Schema = z.output<typeof schema>;
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Sign in to your account
-        </h2>
-      </div>
-      <UForm :schema="loginSchema" :state="state" class="mt-8 space-y-6" @submit="onSubmit">
-        <UAlert v-if="error" color="red" variant="soft" :title="error" icon="i-heroicons-exclamation-circle" />
-        
-        <div class="rounded-md shadow-sm -space-y-px">
-          <UFormField label="Email" name="email">
-            <UInput v-model="state.email" type="email" placeholder="Email address" />
-          </UFormField>
-          
-          <UFormField label="Password" name="password" class="mt-4">
-            <UInput v-model="state.password" type="password" placeholder="Password" />
-          </UFormField>
-        </div>
-
-        <div>
-          <UButton type="submit" block :loading="loading" color="primary">
-            Sign in
-          </UButton>
-        </div>
-      </UForm>
-      
+  <div class="flex flex-col items-center justify-center h-lvh gap-4 p-4">
+    <UPageCard class="w-full max-w-md" spotlight>
+      <UAuthForm
+        :schema="schema"
+        title="Login"
+        description="Enter your credentials to access your account."
+        icon="i-lucide-user"
+        :fields="fields"
+        :providers="providers"
+        :submit="{ label: 'Sign in', color: 'primary' }"
+        @submit="onSubmit"
+      />
       <div class="text-center">
-         <p class="text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account? 
-            <router-link to="/register" class="font-medium text-primary-600 hover:text-primary-500">
-              Sign up
-            </router-link>
-         </p>
+        <p class="text-sm text-muted">
+          Don't have an account?
+          <router-link
+            to="/register"
+            class="font-medium text-primary-600 hover:text-primary-500"
+          >
+            Sign up
+          </router-link>
+        </p>
       </div>
-    </div>
+    </UPageCard>
   </div>
 </template>
