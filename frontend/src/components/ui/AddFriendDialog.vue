@@ -51,6 +51,12 @@ async function handleAdd(user: any) {
 
 <template>
   <UModal v-model="isOpen">
+    <UButton
+      icon="i-heroicons-user-plus"
+      color="gray"
+      variant="ghost"
+      size="sm"
+    />
     <template #content>
       <UCard>
         <template #header>
