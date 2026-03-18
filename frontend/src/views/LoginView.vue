@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { z } from "zod";
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
+const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref("");
 
@@ -14,7 +16,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-const state = ref<LoginForm>({
+const state = reactive<LoginForm>({
   email: "",
   password: "",
 });
@@ -24,24 +26,10 @@ async function onSubmit() {
   error.value = "";
 
   try {
-    // TODO: Replace with actual API call
-    const response = await fetch("http://localhost:8080/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(state.value),
-    });
-
-    if (!response.ok) {
-      throw new Error("Login failed");
-    }
-
-    const data = await response.json();
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-
+    await authStore.login(state.email, state.password);
     router.push("/chats");
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : "Login failed";
+  } catch (err: any) {
+    error.value = err.response?.data?.message || err.message || "Login failed";
   } finally {
     loading.value = false;
   }
@@ -49,65 +37,41 @@ async function onSubmit() {
 </script>
 
 <template>
-  <UContainer
-    class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-  >
-    <UCard class="w-full max-w-md">
-      <template #header>
-        <div class="text-center">
-          <h1 class="text-2xl font-bold text-gray-900">Chat App</h1>
-          <p class="text-gray-500 text-sm mt-2">Sign in to your account</p>
-        </div>
-      </template>
-
-      <div class="space-y-4">
-        <UAlert
-          v-if="error"
-          icon="i-lucide-alert-circle"
-          color="red"
-          :title="error"
-        />
-
-        <UForm
-          :schema="loginSchema"
-          :state="state"
-          @submit="onSubmit"
-          class="space-y-4"
-        >
-          <UFormField label="Email" name="email">
-            <UInput
-              v-model="state.email"
-              type="email"
-              class="w-full"
-              placeholder="you@example.com"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <UFormField label="Password" name="password">
-            <UInput
-              v-model="state.password"
-              type="password"
-              class="w-full"
-              placeholder="••••••••"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <UButton type="submit" block :loading="loading">Sign In</UButton>
-        </UForm>
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          Sign in to your account
+        </h2>
       </div>
+      <UForm :schema="loginSchema" :state="state" class="mt-8 space-y-6" @submit="onSubmit">
+        <UAlert v-if="error" color="red" variant="soft" :title="error" icon="i-heroicons-exclamation-circle" />
+        
+        <div class="rounded-md shadow-sm -space-y-px">
+          <UFormField label="Email" name="email">
+            <UInput v-model="state.email" type="email" placeholder="Email address" />
+          </UFormField>
+          
+          <UFormField label="Password" name="password" class="mt-4">
+            <UInput v-model="state.password" type="password" placeholder="Password" />
+          </UFormField>
+        </div>
 
-      <template #footer>
-        <p class="text-center text-sm text-gray-500">
-          Don't have an account?
-          <ULink
-            to="/register"
-            class="text-primary-500 hover:text-primary-600 font-semibold"
-            >Sign up</ULink
-          >
-        </p>
-      </template>
-    </UCard>
-  </UContainer>
+        <div>
+          <UButton type="submit" block :loading="loading" color="primary">
+            Sign in
+          </UButton>
+        </div>
+      </UForm>
+      
+      <div class="text-center">
+         <p class="text-sm text-gray-600 dark:text-gray-400">
+            Don't have an account? 
+            <router-link to="/register" class="font-medium text-primary-600 hover:text-primary-500">
+              Sign up
+            </router-link>
+         </p>
+      </div>
+    </div>
+  </div>
 </template>

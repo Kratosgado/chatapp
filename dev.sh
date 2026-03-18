@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ACTION=${1:-dev}
+ACTION=${1:-run}
 COMPONENT=${2:-all}
 
 case "$ACTION" in
@@ -12,8 +12,8 @@ exit)
   # Example: Stop docker containers, cleanup, etc.
   docker stop postgis
   ;;
-dev)
-  [ "$COMPONENT" != "api" ] && cd frontend && pnpm dev
+run)
+  [ "$COMPONENT" != "api" ] && cd frontend && pnpm dev &
   [ "$COMPONENT" != "ui" ] && cd backend && ./gradlew bootRun
   ;;
 build)
@@ -25,7 +25,7 @@ test)
   [ "$COMPONENT" != "ui" ] && cd backend && ./gradlew test
   ;;
 *)
-  echo "Usage: $0 {start|exit|dev|build|test}"
+  echo "Usage: $0 {start|exit|run|build|test}"
   exit 1
   ;;
 esac

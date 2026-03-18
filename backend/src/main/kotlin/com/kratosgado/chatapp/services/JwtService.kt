@@ -14,30 +14,48 @@ import java.util.Date
 class JwtService(
     @Value("\${security.jwt.secret-key}") private val secretKey: String,
 ) {
-    fun generateToken(user: User): String {
-        // Ensure the key is valid for HS256 (needs to be at least 32 bytes)
-        // For simplicity in this migration, we assume the provided key is sufficient
-        // or we pad/hash it if needed, but here we strictly follow the logic.
-        // If the key is too short, Keys.hmacShaKeyFor might throw.
-        // A common workaround for legacy keys is to use the bytes directly if supported,
-        // but 0.11.x is strict.
-        // We'll use the bytes of the string.
+    private fun getSigningKey(): java.security.Key {
         val keyBytes = secretKey.toByteArray()
-        val key =
-            try {
-                Keys.hmacShaKeyFor(keyBytes)
-            } catch (e: Exception) {
-                // Fallback or better handling could be added here
-                throw RuntimeException("Invalid JWT secret key", e)
-            }
+        return try {
+            Keys.hmacShaKeyFor(keyBytes)
+        } catch (e: Exception) {
+            throw RuntimeException("Invalid JWT secret key", e)
+        }
+    }
 
+    fun generateToken(user: User): String {
         return Jwts
             .builder()
             .setSubject(user.id)
             .claim("email", user.email)
             .claim("name", user.name)
             .setExpiration(Date.from(Instant.now().plusSeconds(UtilConstants.ONE_DAY_IN_SECONDS.toLong())))
-            .signWith(key, SignatureAlgorithm.HS256)
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact()
+    }
+
+    fun validateToken(token: String): Boolean {
+        return try {
+            Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun getUserIdFromToken(token: String): String? {
+        return try {
+            val claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .body
+            claims.subject
+        } catch (e: Exception) {
+            null
+        }
     }
 }

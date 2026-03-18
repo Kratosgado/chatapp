@@ -1,7 +1,5 @@
 server:
-  logging:
-  servlet:
-    context-path: /api
+  port: 8080
 
 spring:
   application:

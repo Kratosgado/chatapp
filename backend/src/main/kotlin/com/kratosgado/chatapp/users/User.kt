@@ -23,5 +23,8 @@ class User {
     @Column(nullable = false)
     var password: String = ""
 
+    @Column
+    var avatarUrl: String? = null
+
     fun getUsername(): String? = id
 }
