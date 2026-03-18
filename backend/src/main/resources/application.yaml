@@ -1,5 +1,7 @@
 server:
   logging:
+  servlet:
+    context-path: /api
 
 spring:
   application:
