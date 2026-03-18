@@ -13,12 +13,12 @@ onBeforeMount(() => {
 
 <template>
   <UApp>
-    <UHeader>
-      <template #title>
-        <ULink to="/" class="text-2xl font-bold">Demo Chat App</ULink>
-      </template>
-    </UHeader>
-    <UMain>
+    <!-- <UHeader> -->
+    <!--   <template #title> -->
+    <!--     <ULink to="/" class="text-2xl font-bold">Demo Chat App</ULink> -->
+    <!--   </template> -->
+    <!-- </UHeader> -->
+    <UMain class="flex-1 overflow-y-auto">
       <RouterView />
     </UMain>
     <!-- <UFooter /> -->

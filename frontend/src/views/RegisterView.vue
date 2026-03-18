@@ -4,11 +4,12 @@ import { useRouter } from "vue-router";
 import { z } from "zod";
 import { register } from "@/services/auth";
 import { useAuthStore } from "@/stores/auth";
+import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();
 const loading = ref(false);
-const error = ref("");
+const toast = useToast();
 
 const registerSchema = z
   .object({
@@ -22,26 +23,72 @@ const registerSchema = z
     path: ["confirmPassword"],
   });
 
-type RegisterForm = z.infer<typeof registerSchema>;
+const fields: AuthFormField[] = [
+  {
+    name: "username",
+    type: "text",
+    label: "Username",
+    placeholder: "Enter your username",
+    required: true,
+  },
+  {
+    name: "email",
+    type: "email",
+    label: "Email",
+    placeholder: "Enter your email",
+    required: true,
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    placeholder: "Enter your password",
+    required: true,
+  },
+  {
+    name: "confirmPassword",
+    label: "Confirm Password",
+    type: "password",
+    placeholder: "Confirm your password",
+    required: true,
+  },
+];
 
-const state = reactive<RegisterForm>({
-  username: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-});
-
-async function onSubmit() {
+const providers = [
+  {
+    label: "Google",
+    icon: "i-simple-icons-google",
+    onClick: () => {
+      toast.add({ title: "Google", description: "Login with Google" });
+    },
+  },
+  {
+    label: "GitHub",
+    icon: "i-simple-icons-github",
+    onClick: () => {
+      toast.add({ title: "GitHub", description: "Login with GitHub" });
+    },
+  },
+];
+type Schema = z.output<typeof registerSchema>;
+async function onSubmit({ data }: FormSubmitEvent<Schema>) {
   loading.value = true;
-  error.value = "";
 
   try {
-    await register(state.username, state.email, state.password, state.confirmPassword);
+    await register(
+      data.username,
+      data.email,
+      data.password,
+      data.confirmPassword,
+    );
     // After registration, log them in automatically
-    await authStore.login(state.email, state.password);
+    await authStore.login(data.email, data.password);
     router.push("/chats");
   } catch (err: any) {
-    error.value = err.response?.data?.message || err.message || "Registration failed";
+    toast.add({
+      title: "Registration failed",
+      description: err.response?.data?.message || err.message,
+    });
   } finally {
     loading.value = false;
   }
@@ -49,49 +96,30 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Create your account
-        </h2>
-      </div>
-      <UForm :schema="registerSchema" :state="state" class="mt-8 space-y-6" @submit="onSubmit">
-        <UAlert v-if="error" color="red" variant="soft" :title="error" icon="i-heroicons-exclamation-circle" />
-        
-        <div class="rounded-md shadow-sm -space-y-px">
-          <UFormField label="Username" name="username">
-            <UInput v-model="state.username" type="text" placeholder="Username" />
-          </UFormField>
-
-          <UFormField label="Email" name="email" class="mt-4">
-            <UInput v-model="state.email" type="email" placeholder="Email address" />
-          </UFormField>
-          
-          <UFormField label="Password" name="password" class="mt-4">
-            <UInput v-model="state.password" type="password" placeholder="Password" />
-          </UFormField>
-
-          <UFormField label="Confirm Password" name="confirmPassword" class="mt-4">
-            <UInput v-model="state.confirmPassword" type="password" placeholder="Confirm Password" />
-          </UFormField>
-        </div>
-
-        <div>
-          <UButton type="submit" block :loading="loading" color="primary">
-            Sign up
-          </UButton>
-        </div>
-      </UForm>
+  <div class="flex flex-col items-center justify-center h-lvh gap-4 p-4">
+    <UPageCard class="w-full max-w-md" spotlight>
+      <UAuthForm
+        :schema="registerSchema"
+        title="Register"
+        description="Enter your details to create an account."
+        icon="i-lucide-user"
+        :fields="fields"
+        :providers="providers"
+        :submit="{ label: 'Sign up', color: 'primary' }"
+        @submit="onSubmit"
+      />
 
       <div class="text-center">
-         <p class="text-sm text-gray-600 dark:text-gray-400">
-            Already have an account? 
-            <router-link to="/login" class="font-medium text-primary-600 hover:text-primary-500">
-              Sign in
-            </router-link>
-         </p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Already have an account?
+          <router-link
+            to="/login"
+            class="font-medium text-primary-600 hover:text-primary-500"
+          >
+            Sign in
+          </router-link>
+        </p>
       </div>
-    </div>
+    </UPageCard>
   </div>
 </template>

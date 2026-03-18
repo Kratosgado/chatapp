@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Sidebar from '@/components/Sidebar.vue'
-import ChatWindow from '@/components/chat/ChatWindow.vue'
-import { ref } from 'vue'
+import Sidebar from "@/components/Sidebar.vue";
+import ChatWindow from "@/components/chat/ChatWindow.vue";
+import { ref } from "vue";
 
-const isSidebarOpen = ref(false)
+const isSidebarOpen = ref(false);
 </script>
 
 <template>
@@ -15,18 +15,27 @@ const isSidebarOpen = ref(false)
 
     <!-- Mobile Sidebar (Slideover) -->
     <USlideover v-model="isSidebarOpen" side="left" :ui="{ width: 'w-80' }">
-       <Sidebar />
+      <template #content>
+        <Sidebar />
+      </template>
     </USlideover>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col min-w-0 h-full relative">
-       <!-- Mobile Header to toggle sidebar -->
-       <div class="md:hidden flex items-center p-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
-          <UButton icon="i-heroicons-bars-3" color="gray" variant="ghost" @click="isSidebarOpen = true" />
-          <h1 class="ml-4 font-bold text-lg">ChatApp</h1>
-       </div>
+      <!-- Mobile Header to toggle sidebar -->
+      <div
+        class="md:hidden flex items-center p-4 border-b border-gray-200 dark:border-gray-800 shrink-0"
+      >
+        <UButton
+          icon="i-heroicons-bars-3"
+          color="gray"
+          variant="ghost"
+          @click="isSidebarOpen = true"
+        />
+        <h1 class="ml-4 font-bold text-lg">ChatApp</h1>
+      </div>
 
-       <ChatWindow />
+      <ChatWindow />
     </div>
   </div>
 </template>

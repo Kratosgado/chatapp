@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
+import { useStorage } from "@vueuse/core";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,17 +32,12 @@ const router = createRouter({
       component: () => import("../views/SettingsView.vue"),
       meta: { requiresAuth: true },
     },
-    {
-      path: "/about",
-      name: "about",
-      component: () => import("../views/AboutView.vue"),
-    },
   ],
 });
 
 // Auth guard
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem("token");
+  const token = useStorage("chat-token", null as string | null).value;
   const requiresAuth = to.meta.requiresAuth as boolean | undefined;
 
   if (requiresAuth && !token) {
