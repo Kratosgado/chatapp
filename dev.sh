@@ -1,6 +1,9 @@
 #!/bin/bash
 
-case "$1" in
+ACTION=${1:-dev}
+COMPONENT=${2:-all}
+
+case "$ACTION" in
 start)
   # Example: Start docker containers, set environment variables, etc.
   docker start postgis
@@ -9,34 +12,20 @@ exit)
   # Example: Stop docker containers, cleanup, etc.
   docker stop postgis
   ;;
-dev:backend)
-  cd backend && ./gradlew bootRun
-  ;;
-build:backend)
-  cd backend && ./gradlew build
-  ;;
-dev:frontend)
-  cd frontend && pnpm dev
-  ;;
-build:frontend)
-  cd frontend && pnpm build
-  ;;
 dev)
-  cd backend && ./gradlew bootRun &
-  cd frontend && pnpm dev
+  [ "$COMPONENT" != "api" ] && cd frontend && pnpm dev
+  [ "$COMPONENT" != "ui" ] && cd backend && ./gradlew bootRun
   ;;
-test:backend)
-  cd backend && ./gradlew test
-  ;;
-test:frontend)
-  cd frontend && pnpm test
+build)
+  [ "$COMPONENT" != "api" ] && cd frontend && pnpm build
+  [ "$COMPONENT" != "ui" ] && cd backend && ./gradlew build
   ;;
 test)
-  cd backend && ./gradlew test &
-  cd frontend && pnpm test
+  [ "$COMPONENT" != "api" ] && cd frontend && pnpm test
+  [ "$COMPONENT" != "ui" ] && cd backend && ./gradlew test
   ;;
 *)
-  echo "Usage: $0 {start|exit}"
+  echo "Usage: $0 {start|exit|dev|build|test}"
   exit 1
   ;;
 esac
