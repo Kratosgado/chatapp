@@ -1,69 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+import { updateProfile } from '@/services/user'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
-interface User {
-  name: string
-  email: string
-  bio: string
-  avatar: string
-}
-
-interface Settings {
-  emailNotifications: boolean
-  pushNotifications: boolean
-  soundNotifications: boolean
-  messagePermission: 'all' | 'friends' | 'none'
-  showOnlineStatus: boolean
-}
-
-const user = ref<User>({
-  name: 'John Doe',
-  email: 'john@example.com',
-  bio: 'Love chatting with friends!',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-})
-
-const settings = ref<Settings>({
-  emailNotifications: true,
-  pushNotifications: true,
-  soundNotifications: true,
-  messagePermission: 'all',
-  showOnlineStatus: true,
-})
-
+const name = ref('')
+const avatarUrl = ref('')
 const saving = ref(false)
+const error = ref('')
+const success = ref('')
 
-async function saveProfile() {
-  saving.value = true
-  try {
-    // TODO: API call to save profile
-    console.log('Saving profile:', user.value)
-    // Show success toast
-  } finally {
-    saving.value = false
+onMounted(() => {
+  if (user.value) {
+    name.value = user.value.name
+    avatarUrl.value = user.value.avatarUrl || ''
   }
-}
+})
 
-async function saveNotifications() {
+async function handleSave() {
+  if (!user.value) return
   saving.value = true
-  try {
-    // TODO: API call to save notification settings
-    console.log('Saving notification settings:', settings.value)
-    // Show success toast
-  } finally {
-    saving.value = false
-  }
-}
+  error.value = ''
+  success.value = ''
 
-async function savePrivacy() {
-  saving.value = true
   try {
-    // TODO: API call to save privacy settings
-    console.log('Saving privacy settings:', settings.value)
-    // Show success toast
+    const updatedUser = await updateProfile({
+      ...user.value,
+      name: name.value,
+      avatarUrl: avatarUrl.value || undefined
+    })
+    // Update store
+    user.value = updatedUser
+    success.value = 'Profile updated successfully'
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Failed to update profile'
   } finally {
     saving.value = false
   }
@@ -71,76 +46,45 @@ async function savePrivacy() {
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto py-8 px-4">
-    <UCard>
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-gray-900">Settings</h2>
-          <RouterLink to="/chats">
-            <UButton icon="i-lucide-arrow-left" color="gray" variant="ghost" />
-          </RouterLink>
-        </div>
-      </template>
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+      <div class="mb-6 flex items-center justify-between">
+         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+         <UButton icon="i-heroicons-arrow-left" color="gray" variant="ghost" @click="router.push('/chats')">Back to Chats</UButton>
+      </div>
 
-      <UTabs
-        :items="[
-          { slot: 'profile', label: 'Profile' },
-          { slot: 'notifications', label: 'Notifications' },
-          { slot: 'privacy', label: 'Privacy' },
-        ]"
-      >
-        <template #profile>
-          <div class="space-y-4">
-            <div class="flex items-center gap-4">
-              <UAvatar :src="user.avatar" :alt="user.name" size="xl" />
-              <UButton>Change Avatar</UButton>
-            </div>
-
-            <UFormField label="Full Name">
-              <UInput v-model="user.name" />
-            </UFormField>
-
-            <UFormField label="Email">
-              <UInput v-model="user.email" type="email" />
-            </UFormField>
-
-            <UFormField label="Bio">
-              <UTextarea v-model="user.bio" placeholder="Tell us about yourself" />
-            </UFormField>
-
-            <UButton @click="saveProfile" :loading="saving">Save Changes</UButton>
-          </div>
+      <UCard>
+        <template #header>
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Profile</h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update your personal information.</p>
         </template>
 
-        <template #notifications>
-          <div class="space-y-4">
-            <UCheckbox v-model="settings.emailNotifications" label="Email Notifications" />
-            <UCheckbox v-model="settings.pushNotifications" label="Push Notifications" />
-            <UCheckbox v-model="settings.soundNotifications" label="Sound Notifications" />
+        <form @submit.prevent="handleSave" class="space-y-6">
+           <UAlert v-if="error" color="red" variant="soft" :title="error" icon="i-heroicons-exclamation-circle" />
+           <UAlert v-if="success" color="green" variant="soft" :title="success" icon="i-heroicons-check-circle" />
 
-            <UButton @click="saveNotifications" :loading="saving">Save Preferences</UButton>
-          </div>
-        </template>
+           <div class="flex items-center gap-6">
+              <UAvatar :src="avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}`" size="3xl" />
+              <div class="flex-1">
+                 <UFormField label="Avatar URL" name="avatarUrl" help="Paste an image URL for your avatar">
+                    <UInput v-model="avatarUrl" placeholder="https://example.com/avatar.jpg" />
+                 </UFormField>
+              </div>
+           </div>
 
-        <template #privacy>
-          <div class="space-y-4">
-            <UFormField label="Who can message you?">
-              <USelectMenu
-                v-model="settings.messagePermission"
-                :options="[
-                  { value: 'all', label: 'Everyone' },
-                  { value: 'friends', label: 'Friends only' },
-                  { value: 'none', label: 'Nobody' },
-                ]"
-              />
-            </UFormField>
+           <UFormField label="Display Name" name="name" required>
+              <UInput v-model="name" />
+           </UFormField>
 
-            <UCheckbox v-model="settings.showOnlineStatus" label="Show online status" />
+           <UFormField label="Email" name="email">
+              <UInput :model-value="user?.email" disabled />
+           </UFormField>
 
-            <UButton @click="savePrivacy" :loading="saving">Save Settings</UButton>
-          </div>
-        </template>
-      </UTabs>
-    </UCard>
+           <div class="flex justify-end">
+              <UButton type="submit" :loading="saving" color="primary">Save Changes</UButton>
+           </div>
+        </form>
+      </UCard>
+    </div>
   </div>
 </template>

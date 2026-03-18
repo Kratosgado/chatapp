@@ -1,6 +1,9 @@
 package com.kratosgado.chatapp.auth
 
+import com.kratosgado.chatapp.auth.dto.LoginDto
+import com.kratosgado.chatapp.auth.dto.LoginResponseDto
 import com.kratosgado.chatapp.auth.dto.RegisterDto
+import com.kratosgado.chatapp.auth.dto.UserDto
 import com.kratosgado.chatapp.services.JwtService
 import com.kratosgado.chatapp.users.User
 import com.kratosgado.chatapp.users.UserRepo
@@ -45,5 +48,36 @@ class AuthService(
         res.addCookie(cookie)
 
         return user
+    }
+
+    fun login(
+        dto: LoginDto,
+        res: HttpServletResponse,
+    ): LoginResponseDto {
+        val user = userRepo.findByEmail(dto.email) ?: throw ApiException.badRequest("Invalid email or password")
+
+        if (!passwordEncoder.matches(dto.password, user.password)) {
+            throw ApiException.badRequest("Invalid email or password")
+        }
+
+        val token = jwtService.generateToken(user)
+        val cookie = Cookie("jwt", token)
+
+        cookie.isHttpOnly = true
+        cookie.secure = true
+        cookie.path = "/"
+        cookie.maxAge = UtilConstants.ONE_DAY_IN_SECONDS
+        res.addCookie(cookie)
+
+        return LoginResponseDto(token, UserDto.fromEntity(user))
+    }
+
+    fun logout(res: HttpServletResponse) {
+        val cookie = Cookie("jwt", "")
+        cookie.isHttpOnly = true
+        cookie.secure = true
+        cookie.path = "/"
+        cookie.maxAge = 0
+        res.addCookie(cookie)
     }
 }

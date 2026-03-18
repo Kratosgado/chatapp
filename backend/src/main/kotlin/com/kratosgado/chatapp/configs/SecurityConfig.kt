@@ -8,7 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -17,21 +17,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig {
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(
+        http: HttpSecurity,
+        jwtAuthenticationFilter: JwtAuthenticationFilter,
+    ): SecurityFilterChain {
         http
-            .csrf { csrf ->
-                csrf
-                    .ignoringRequestMatchers("/auth/**")
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            }.authorizeHttpRequests { req ->
+            .csrf { it.disable() }
+            .cors { it.configurationSource(configurationSource()) }
+            .authorizeHttpRequests { req ->
                 req
-                    .requestMatchers("/auth/**", "/docs/**")
+                    .requestMatchers("/api/auth/**", "/docs/**", "/error")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
-            }.sessionManagement { session ->
+            }
+            .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }
@@ -39,10 +42,10 @@ class SecurityConfig {
     @Bean
     fun configurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("http://localhost:3000")
+        config.allowedOrigins = listOf("http://localhost:3000", "http://localhost:5173") // Added frontend port
         config.allowCredentials = true
-        config.maxAge = 86400L
-        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        config.allowedHeaders = listOf("*")
 
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", config)
