@@ -122,7 +122,7 @@ class ChatService(
 
         return ChatRoomDto(
             id = chatRoom.id!!,
-            name = displayName ?: "Chat",
+            name = displayName,
             isGroup = chatRoom.isGroup,
             avatarUrl = avatarUrl,
             lastMessage = lastMessage,
