@@ -50,7 +50,8 @@ class ChatService(
         val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
         val memberships = chatRoomMemberRepo.findByUser(user)
         // Sort by last message or created at descending
-        return memberships.map { toDto(it.chatRoom, userId) }
+        return memberships
+            .map { toDto(it.chatRoom, userId) }
             .sortedByDescending { it.lastMessage?.sentAt ?: it.createdAt }
     }
 
@@ -66,7 +67,8 @@ class ChatService(
             throw ApiException.forbidden("Not a member")
         }
 
-        return messageRepo.findByChatRoomOrderBySentAtDesc(chatRoom, pageable)
+        return messageRepo
+            .findByChatRoomOrderBySentAtDesc(chatRoom, pageable)
             .content
             .map { MessageDto.fromEntity(it) }
     }
@@ -110,9 +112,9 @@ class ChatService(
                 avatarUrl = members[0].avatarUrl
             }
         }
-        
+
         if (displayName == null) {
-             displayName = members.take(3).joinToString(", ") { it.name } + if (members.size > 3) "..." else ""
+            displayName = members.take(3).joinToString(", ") { it.name } + if (members.size > 3) "..." else ""
         }
 
         val lastMessagePage = messageRepo.findByChatRoomOrderBySentAtDesc(chatRoom, Pageable.ofSize(1))
