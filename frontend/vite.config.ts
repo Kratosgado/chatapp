@@ -8,7 +8,18 @@ import ui from "@nuxt/ui/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss(), ui({}), vueDevTools()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+    ui({
+      ui: {
+        colors: {
+          primary: "blue",
+        },
+      },
+    }),
+    vueDevTools(),
+  ],
   server: {
     port: 3000,
   },

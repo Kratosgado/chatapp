@@ -25,32 +25,24 @@ class ChatController(
     fun createChat(
         @AuthenticationPrincipal user: User,
         @RequestBody @Valid dto: CreateChatDto,
-    ): ChatRoomDto {
-        return chatService.createChat(user.id!!, dto.name, dto.participantIds)
-    }
+    ): ChatRoomDto = chatService.createChat(user.id!!, dto.name, dto.participantIds)
 
     @GetMapping
     fun getChats(
         @AuthenticationPrincipal user: User,
-    ): List<ChatRoomDto> {
-        return chatService.getChats(user.id!!)
-    }
+    ): List<ChatRoomDto> = chatService.getChats(user.id!!)
 
     @GetMapping("/{chatId}/messages")
     fun getMessages(
         @AuthenticationPrincipal user: User,
         @PathVariable chatId: String,
         @PageableDefault(size = 20) pageable: Pageable,
-    ): List<MessageDto> {
-        return chatService.getMessages(user.id!!, chatId, pageable)
-    }
+    ): List<MessageDto> = chatService.getMessages(user.id!!, chatId, pageable)
 
     @PostMapping("/{chatId}/messages")
     fun sendMessage(
         @AuthenticationPrincipal user: User,
         @PathVariable chatId: String,
         @RequestBody @Valid dto: SendMessageDto,
-    ): MessageDto {
-        return chatService.sendMessage(user.id!!, chatId, dto.content)
-    }
+    ): MessageDto = chatService.sendMessage(user.id!!, chatId, dto.content)
 }
