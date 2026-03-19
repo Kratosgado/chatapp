@@ -3,15 +3,15 @@ import type { ChatRoom, Message } from "@/types";
 
 export const getChats = async (): Promise<ChatRoom[]> => {
   const response = await api.get("/chats");
-  return response.data.data;
+  return response.data;
 };
 
 export const createChat = async (
-  participants: string[],
+  participantIds: string[],
   name?: string,
 ): Promise<ChatRoom> => {
-  const response = await api.post("/chats", { participants, name });
-  return response.data.data;
+  const response = await api.post("/chats", { participantIds, name });
+  return response.data;
 };
 
 export const getMessages = async (
@@ -22,7 +22,7 @@ export const getMessages = async (
   const response = await api.get(
     `/chats/${chatId}/messages?page=${page}&size=${size}`,
   );
-  return response.data.data;
+  return response.data;
 };
 
 export const sendMessage = async (
@@ -30,5 +30,5 @@ export const sendMessage = async (
   content: string,
 ): Promise<Message> => {
   const response = await api.post(`/chats/${chatId}/messages`, { content });
-  return response.data.data;
+  return response.data;
 };

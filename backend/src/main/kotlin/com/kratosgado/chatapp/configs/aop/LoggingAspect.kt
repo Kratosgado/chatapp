@@ -13,7 +13,6 @@ import java.util.Arrays
 @Aspect
 @Component
 class LoggingAspect {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
@@ -21,9 +20,9 @@ class LoggingAspect {
      */
     @Pointcut(
         "within(@org.springframework.stereotype.Repository *)" +
-                " || within(@org.springframework.stereotype.Service *)" +
-                " || within(@org.springframework.web.bind.annotation.RestController *)" +
-                " || execution(* com.kratosgado.chatapp..*Repository.*(..))"
+            " || within(@org.springframework.stereotype.Service *)" +
+            " || within(@org.springframework.web.bind.annotation.RestController *)" +
+            " || execution(* com.kratosgado.chatapp..*Repository.*(..))",
     )
     fun springBeanPointcut() {
         // Method is empty as this is just a Pointcut, the implementations are in the advices.
@@ -33,7 +32,7 @@ class LoggingAspect {
      * Pointcut that matches all Spring beans in the application's main packages.
      */
     @Pointcut(
-        "within(com.kratosgado.chatapp..*)"
+        "within(com.kratosgado.chatapp..*)",
     )
     fun applicationPackagePointcut() {
         // Method is empty as this is just a Pointcut, the implementations are in the advices.
@@ -46,13 +45,16 @@ class LoggingAspect {
      * @param e exception
      */
     @AfterThrowing(pointcut = "applicationPackagePointcut() && springBeanPointcut()", throwing = "e")
-    fun logAfterThrowing(joinPoint: JoinPoint, e: Throwable) {
+    fun logAfterThrowing(
+        joinPoint: JoinPoint,
+        e: Throwable,
+    ) {
         logger.error(
-            "Exception in {}.{}() with cause = {}",
+            "****Exception in {}.{}() with cause = {}",
             joinPoint.signature.declaringTypeName,
             joinPoint.signature.name,
             if (e.cause != null) e.cause else "NULL",
-            e
+            e,
         )
     }
 
@@ -67,10 +69,10 @@ class LoggingAspect {
     fun logAround(joinPoint: ProceedingJoinPoint): Any? {
         if (logger.isDebugEnabled) {
             logger.debug(
-                "Enter: {}.{}() with argument[s] = {}",
+                ">>>> Enter: {}.{}() with argument[s] = {}",
                 joinPoint.signature.declaringTypeName,
                 joinPoint.signature.name,
-                Arrays.toString(joinPoint.args)
+                Arrays.toString(joinPoint.args),
             )
         }
         try {
@@ -79,11 +81,11 @@ class LoggingAspect {
             val end = System.currentTimeMillis()
             if (logger.isDebugEnabled) {
                 logger.debug(
-                    "Exit: {}.{}() with result = {} ({} ms)",
+                    "<<<<: {}.{}() with result = {} ({} ms)",
                     joinPoint.signature.declaringTypeName,
                     joinPoint.signature.name,
                     result,
-                    end - start
+                    end - start,
                 )
             }
             return result
@@ -92,7 +94,7 @@ class LoggingAspect {
                 "Illegal argument: {} in {}.{}()",
                 Arrays.toString(joinPoint.args),
                 joinPoint.signature.declaringTypeName,
-                joinPoint.signature.name
+                joinPoint.signature.name,
             )
             throw e
         }

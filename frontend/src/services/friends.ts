@@ -5,12 +5,12 @@ export const sendFriendRequest = async (
   receiverId: string,
 ): Promise<string> => {
   const response = await api.post("/friends/requests", { receiverId });
-  return response.data.data;
+  return response.data;
 };
 
 export const getPendingRequests = async (): Promise<FriendRequest[]> => {
   const response = await api.get("/friends/requests");
-  return response.data.data;
+  return response.data;
 };
 
 export const respondToRequest = async (
@@ -20,15 +20,15 @@ export const respondToRequest = async (
   const response = await api.put(
     `/friends/requests/${requestId}?accept=${accept}`,
   );
-  return response.data.data;
+  return response.data;
 };
 
 export const getFriends = async (): Promise<User[]> => {
   const response = await api.get("/friends");
-  return response.data.data;
+  return response.data;
 };
 
 export const removeFriend = async (friendId: string): Promise<string> => {
   const response = await api.delete(`/friends/${friendId}`);
-  return response.data.data;
+  return response.data;
 };
