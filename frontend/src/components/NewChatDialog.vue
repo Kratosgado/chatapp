@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { z } from "zod";
 import { useFriendsStore } from "@/stores/friends";
 import { useChatsStore } from "@/stores/chats";
@@ -58,7 +58,7 @@ async function createChat() {
             <div class="flex gap-4">
               <URadioGroup
                 v-model="state.type"
-                :options="[
+                :items="[
                   { value: 'direct', label: 'Direct Message' },
                   { value: 'group', label: 'Group Chat' },
                 ]"
@@ -69,14 +69,16 @@ async function createChat() {
           <UFormField label="Select Friends" name="users">
             <USelectMenu
               v-model="state.users"
+              value-key="id"
+              label-key="name"
               multiple
               searchable
               placeholder="Select friends..."
-              :options="friends"
+              :items="friends"
               value-attribute="id"
               option-attribute="name"
             >
-              <template #label>
+              <template #content-top>
                 <span v-if="state.users.length"
                   >{{ state.users.length }} selected</span
                 >

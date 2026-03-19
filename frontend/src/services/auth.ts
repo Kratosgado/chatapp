@@ -6,7 +6,7 @@ export const login = async (
   password: string,
 ): Promise<LoginResponse> => {
   const response = await api.post("/auth/login", { email, password });
-  return response.data.data;
+  return response.data;
 };
 
 export const register = async (

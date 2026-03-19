@@ -25,39 +25,28 @@ class FriendController(
     fun sendRequest(
         @AuthenticationPrincipal user: User,
         @RequestBody @Valid dto: SendRequestDto,
-    ): String {
-        return friendService.sendRequest(user.id!!, dto.receiverId)
-    }
+    ): String = friendService.sendRequest(user.id!!, dto.receiverId)
 
     @GetMapping("/requests")
     fun getPendingRequests(
         @AuthenticationPrincipal user: User,
-    ): List<FriendRequestDto> {
-        return friendService.getPendingRequests(user.id!!)
-    }
+    ): List<FriendRequestDto> = friendService.getPendingRequests(user.id!!)
 
     @PutMapping("/requests/{requestId}")
     fun respondToRequest(
         @AuthenticationPrincipal user: User,
         @PathVariable requestId: String,
         @RequestParam accept: Boolean,
-    ): String {
-        return friendService.respondToRequest(user.id!!, requestId, accept)
-    }
+    ): String = friendService.respondToRequest(user.id!!, requestId, accept)
 
     @GetMapping
     fun getFriends(
         @AuthenticationPrincipal user: User,
-    ): List<UserDto> {
-        return friendService.getFriends(user.id!!)
-    }
+    ): List<UserDto> = friendService.getFriends(user.id!!)
 
     @DeleteMapping("/{friendId}")
     fun removeFriend(
         @AuthenticationPrincipal user: User,
         @PathVariable friendId: String,
-    ): String {
-        // Here friendId is the User ID of the friend to remove
-        return friendService.removeFriend(user.id!!, friendId)
-    }
+    ): String = friendService.removeFriend(user.id!!, friendId)
 }

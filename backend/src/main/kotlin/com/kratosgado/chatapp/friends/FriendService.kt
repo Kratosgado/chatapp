@@ -84,17 +84,21 @@ class FriendService(
         }
     }
 
-    fun removeFriend(userId: String, friendId: String): String {
-         val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
-         val friend = userRepo.findById(friendId).orElseThrow { ApiException.notFound("Friend not found") }
+    fun removeFriend(
+        userId: String,
+        friendId: String,
+    ): String {
+        val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
+        val friend = userRepo.findById(friendId).orElseThrow { ApiException.notFound("Friend not found") }
 
-         val friendship = friendRepo.findBySenderAndReceiver(user, friend) 
-             ?: friendRepo.findBySenderAndReceiver(friend, user)
-             ?: throw ApiException.notFound("Friendship not found")
+        val friendship =
+            friendRepo.findBySenderAndReceiver(user, friend)
+                ?: friendRepo.findBySenderAndReceiver(friend, user)
+                ?: throw ApiException.notFound("Friendship not found")
 
-         if (friendship.status != RequestStatus.ACCEPTED) throw ApiException.badRequest("Not friends")
-         
-         friendRepo.delete(friendship)
-         return "Friend removed"
+        if (friendship.status != RequestStatus.ACCEPTED) throw ApiException.badRequest("Not friends")
+
+        friendRepo.delete(friendship)
+        return "Friend removed"
     }
 }
