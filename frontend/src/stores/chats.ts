@@ -85,8 +85,9 @@ export const useChatsStore = defineStore("chats", () => {
     // But `sendMessage` service uses REST.
     // Let's stick to REST for sending and use WS for receiving others' messages.
 
-    const message = await sendMessage(chatId, content);
-    messages.value.push(message);
+    // const message = await sendMessage(chatId, content);
+    // messages.value.push(message);
+    wsSendMessage(`/app/chat.sendMessage/${chatId}`, { content });
 
     // Also notify typing stopped
     sendTyping(chatId, false);
