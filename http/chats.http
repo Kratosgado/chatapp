@@ -1,0 +1,33 @@
+@baseUrl = http://localhost:8080/api
+
+### Create Chat
+# @name createChat
+POST {{baseUrl}}/chats
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "name": "General Chat",
+    "participantIds": ["{{otherUserId}}"]
+}
+
+> {%
+    client.global.set("chatId", response.body.data.id);
+%}
+
+### Get Chats
+GET {{baseUrl}}/chats
+Authorization: Bearer {{authToken}}
+
+### Send Message
+POST {{baseUrl}}/chats/{{chatId}}/messages
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "content": "Hello World!"
+}
+
+### Get Messages
+GET {{baseUrl}}/chats/{{chatId}}/messages
+Authorization: Bearer {{authToken}}

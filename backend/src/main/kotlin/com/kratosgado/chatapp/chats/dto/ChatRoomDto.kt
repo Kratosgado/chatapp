@@ -1,6 +1,7 @@
 package com.kratosgado.chatapp.chats.dto
 
 import com.kratosgado.chatapp.auth.dto.UserDto
+import org.springframework.beans.factory.annotation.Value
 import java.time.LocalDateTime
 
 data class ChatRoomDto(

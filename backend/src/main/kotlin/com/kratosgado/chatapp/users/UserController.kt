@@ -19,30 +19,21 @@ class UserController(
     @GetMapping("/me")
     fun getCurrentUser(
         @AuthenticationPrincipal user: User,
-    ): UserDto {
-        // Reload user from DB to get latest state including avatar
-        return userService.getUserById(user.id!!)
-    }
+    ): UserDto = userService.getUserById(user.id!!)
 
     @PutMapping("/me")
     fun updateProfile(
         @AuthenticationPrincipal user: User,
         @RequestBody dto: UpdateProfileDto,
-    ): UserDto {
-        return userService.updateProfile(user.id!!, dto)
-    }
+    ): UserDto = userService.updateProfile(user.id!!, dto)
 
     @GetMapping("/{id}")
     fun getUser(
         @PathVariable id: String,
-    ): UserDto {
-        return userService.getUserById(id)
-    }
+    ): UserDto = userService.getUserById(id)
 
     @GetMapping
     fun searchUsers(
         @RequestParam query: String,
-    ): List<UserDto> {
-        return userService.searchUsers(query)
-    }
+    ): List<UserDto> = userService.searchUsers(query)
 }

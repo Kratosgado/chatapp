@@ -1,0 +1,42 @@
+### 
+
+@baseUrl = http://localhost:8080/api
+
+
+### Get Current User
+
+GET {{baseUrl}}/users/me HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+
+### Update Profile
+
+PUT {{baseUrl}}/users/me HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "avatarUrl": "https://example.com/avatar.png",
+  "name": "Updated Test User"
+}
+
+
+### Search Users
+
+# @name searchUsers
+
+GET {{baseUrl}}/users?query=Admin HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+> {%
+  // Assuming the search finds at least one user
+  if (response.body.data.length > 0) {
+    client.global.set("otherUserId", response.body.data[0].id);
+  }
+%}
+
+
+### Get User by ID
+
+GET {{baseUrl}}/users/{{userId}} HTTP/1.1
+Authorization: Bearer {{authToken}}

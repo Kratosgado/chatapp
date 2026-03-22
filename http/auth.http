@@ -1,0 +1,58 @@
+### 
+
+@baseUrl = http://localhost:8080/api
+
+
+### Register User
+
+POST {{baseUrl}}/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "confirmPassword": "password123",
+  "email": "test@example.com",
+  "name": "Test User",
+  "password": "password123"
+}
+
+
+### Login
+
+# @name login
+
+POST {{baseUrl}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+> {%
+  client.global.set("authToken", response.body.data.token);
+  client.global.set("userId", response.body.data.user.id);
+%}
+
+
+### Login
+
+# @name admin login
+
+POST {{baseUrl}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "admin@amalitech.com",
+  "password": "Admin@123"
+}
+
+> {%
+  client.global.set("adminToken", response.body.data.token);
+  client.global.set("adminId", response.body.data.user.id);
+%}
+
+
+### Logout
+
+POST {{baseUrl}}/auth/logout HTTP/1.1
+Authorization: Bearer {{authToken}}

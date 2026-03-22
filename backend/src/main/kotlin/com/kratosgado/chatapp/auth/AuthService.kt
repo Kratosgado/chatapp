@@ -20,10 +20,7 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
 ) {
-    fun register(
-        dto: RegisterDto,
-        res: HttpServletResponse,
-    ): User {
+    fun register(dto: RegisterDto): User {
         if (userRepo.existsByEmail(dto.email)) {
             throw ApiException.badRequest("Email already registered")
         }
@@ -39,21 +36,10 @@ class AuthService(
         userRepo.save(user)
 
         val token = jwtService.generateToken(user)
-        val cookie = Cookie("jwt", token)
-
-        cookie.isHttpOnly = true
-        cookie.secure = true
-        cookie.path = "/"
-        cookie.maxAge = UtilConstants.ONE_DAY_IN_SECONDS
-        res.addCookie(cookie)
-
         return user
     }
 
-    fun login(
-        dto: LoginDto,
-        res: HttpServletResponse,
-    ): LoginResponseDto {
+    fun login(dto: LoginDto): LoginResponseDto {
         val user = userRepo.findByEmail(dto.email) ?: throw ApiException.badRequest("Invalid email or password")
 
         if (!passwordEncoder.matches(dto.password, user.password)) {
@@ -62,12 +48,6 @@ class AuthService(
 
         val token = jwtService.generateToken(user)
         val cookie = Cookie("jwt", token)
-
-        cookie.isHttpOnly = true
-        cookie.secure = true
-        cookie.path = "/"
-        cookie.maxAge = UtilConstants.ONE_DAY_IN_SECONDS
-        res.addCookie(cookie)
 
         return LoginResponseDto(token, UserDto.fromEntity(user))
     }

@@ -30,29 +30,22 @@ class ChatService(
 
         // In a real app, check for existing DM
         val isGroup = participants.size > 1 || name != null
-
         val chatRoom = ChatRoom(name = name, isGroup = isGroup)
         chatRoomRepo.save(chatRoom)
 
-        chatRoomMemberRepo.save(ChatRoomMember(chatRoom = chatRoom, user = user, role = MemberRole.OWNER))
+        val chatMembers = participants.map { ChatRoomMember(chatRoom, it, MemberRole.MEMBER) }.toMutableSet()
+        chatMembers.add(ChatRoomMember(chatRoom = chatRoom, user, MemberRole.OWNER))
 
-        participants.forEach {
-            // Avoid adding self again if included in participants list
-            if (it.id != userId) {
-                chatRoomMemberRepo.save(ChatRoomMember(chatRoom = chatRoom, user = it, role = MemberRole.MEMBER))
-            }
-        }
-
+        chatRoomMemberRepo.saveAll(chatMembers)
+        chatRoom.members = chatMembers
         return toDto(chatRoom, userId)
     }
 
     fun getChats(userId: String): List<ChatRoomDto> {
-        val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
-        val memberships = chatRoomMemberRepo.findByUser(user)
+        val chats = chatRoomRepo.findByMembersUserId(userId)
         // Sort by last message or created at descending
-        return memberships
-            .map { toDto(it.chatRoom, userId) }
-            .sortedByDescending { it.lastMessage?.sentAt ?: it.createdAt }
+        return chats
+            .map { toDto(it, userId) }
     }
 
     fun getMessages(
@@ -60,15 +53,13 @@ class ChatService(
         chatId: String,
         pageable: Pageable,
     ): List<MessageDto> {
-        val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
-        val chatRoom = chatRoomRepo.findById(chatId).orElseThrow { ApiException.notFound("Chat not found") }
 
-        if (chatRoomMemberRepo.findByChatRoomAndUser(chatRoom, user) == null) {
+        if (chatRoomMemberRepo.existsByUserIdAndChatRoomId(userId, chatId)) {
             throw ApiException.forbidden("Not a member")
         }
 
         return messageRepo
-            .findByChatRoomOrderBySentAtDesc(chatRoom, pageable)
+            .findByChatRoomIdOrderBySentAtDesc(chatId, pageable)
             .content
             .map { MessageDto.fromEntity(it) }
     }
@@ -82,11 +73,13 @@ class ChatService(
         val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
         val chatRoom = chatRoomRepo.findById(chatId).orElseThrow { ApiException.notFound("Chat not found") }
 
-        if (chatRoomMemberRepo.findByChatRoomAndUser(chatRoom, user) == null) {
+        // remove check
+        if (!chatRoom.members.any { it.user.id.equals(userId) }) {
             throw ApiException.forbidden("Not a member")
         }
 
-        val message = Message(chatRoom = chatRoom, sender = user, content = content)
+        // TODO: create by setting userId insttead of user
+        val message = Message(chatRoom, user, content)
         messageRepo.save(message)
 
         return MessageDto.fromEntity(message)
@@ -96,7 +89,7 @@ class ChatService(
         chatRoom: ChatRoom,
         currentUserId: String,
     ): ChatRoomDto {
-        val members = chatRoomMemberRepo.findByChatRoom(chatRoom).map { it.user }
+        val members = chatRoom.members.map { it.user }
         var displayName = chatRoom.name
         var avatarUrl: String? = null
 
@@ -117,8 +110,8 @@ class ChatService(
             displayName = members.take(3).joinToString(", ") { it.name } + if (members.size > 3) "..." else ""
         }
 
-        val lastMessagePage = messageRepo.findByChatRoomOrderBySentAtDesc(chatRoom, Pageable.ofSize(1))
-        val lastMessage = if (lastMessagePage.hasContent()) MessageDto.fromEntity(lastMessagePage.content[0]) else null
+        val lastMessagePage = chatRoom.messages.lastOrNull()
+        val lastMessage = if (lastMessagePage != null) MessageDto.fromEntity(lastMessagePage) else null
 
         return ChatRoomDto(
             id = chatRoom.id!!,

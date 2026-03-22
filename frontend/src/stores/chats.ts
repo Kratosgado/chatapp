@@ -1,11 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
-import {
-  getChats,
-  createChat,
-  getMessages,
-  sendMessage,
-} from "@/services/chats";
+import { getChats, createChat, getMessages } from "@/services/chats";
 import type { ChatRoom, Message } from "@/types";
 import {
   connect,
@@ -15,6 +10,7 @@ import {
 } from "@/services/websocket";
 import { useAuthStore } from "./auth";
 import { storeToRefs } from "pinia";
+import type { StompSubscription } from "@stomp/stompjs";
 
 export const useChatsStore = defineStore("chats", () => {
   const authStore = useAuthStore();
@@ -27,8 +23,8 @@ export const useChatsStore = defineStore("chats", () => {
   const typingUsers = ref<Record<string, boolean>>({});
 
   // WebSocket subscriptions
-  let chatSubscription: any = null;
-  let typingSubscription: any = null;
+  let chatSubscription: StompSubscription | null = null;
+  let typingSubscription: StompSubscription | null = null;
 
   // Initialize WebSocket connection when user is logged in
   watch(
@@ -70,26 +66,7 @@ export const useChatsStore = defineStore("chats", () => {
   };
 
   const send = async (chatId: string, content: string) => {
-    // Send via REST for reliability and immediate feedback (optimistic UI or confirmation)
-    // Alternatively, send via WS only.
-    // The plan says: "Send message (REST fallback)".
-    // If we use REST, we get the message back immediately.
-    // However, if we are subscribed to the topic, we will receive the message via WS too.
-    // To avoid duplication, we can check ID or just rely on Vue's reactivity/deduplication if implemented.
-    // Simplest approach: Use REST to send, and ignore own messages via WS if they have same ID or just append if not present.
-    // Or simpler: Send via REST, get response, add to messages.
-    // WS will broadcast to everyone.
-    // If I receive my own message via WS, I should ignore it if I already added it via REST.
-
-    // Let's try sending via WS primarily for real-time feel if connected.
-    // But `sendMessage` service uses REST.
-    // Let's stick to REST for sending and use WS for receiving others' messages.
-
-    // const message = await sendMessage(chatId, content);
-    // messages.value.push(message);
     wsSendMessage(`/app/chat.sendMessage/${chatId}`, { content });
-
-    // Also notify typing stopped
     sendTyping(chatId, false);
   };
 

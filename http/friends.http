@@ -1,0 +1,59 @@
+### 
+
+@baseUrl = http://localhost:8080/api
+
+
+### Send Friend Request
+
+# @name sendRequest
+
+POST {{baseUrl}}/friends/requests HTTP/1.1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "receiverId": "{{otherUserId}}"
+}
+
+> {%
+  // Capture the request ID if possible, but the controller returns a String "Friend request sent"
+  // So we can't easily capture the ID here without listing requests.
+%}
+
+
+### Get Pending Requests
+
+# @name getPendingRequests
+
+GET {{baseUrl}}/friends/requests HTTP/1.1
+Authorization: Bearer {{adminToken}}
+
+> {%
+  if (response.body.data.length > 0) {
+    client.global.set("requestId", response.body.data[0].id);
+  }
+%}
+
+
+### Respond to Request (Accept)
+
+PUT {{baseUrl}}/friends/requests/{{requestId}}?accept=true HTTP/1.1
+Authorization: Bearer {{adminToken}}
+
+
+### Respond to Request (Reject)
+
+PUT {{baseUrl}}/friends/requests/{{requestId}}?accept=false HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+
+### Get Friends
+
+GET {{baseUrl}}/friends HTTP/1.1
+Authorization: Bearer {{authToken}}
+
+
+### Remove Friend
+
+DELETE {{baseUrl}}/friends/{{otherUserId}} HTTP/1.1
+Authorization: Bearer {{authToken}}

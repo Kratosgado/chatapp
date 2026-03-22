@@ -1,0 +1,40 @@
+# WebSocket Connection for Chat Updates
+# Note: The server uses STOMP over SockJS. 
+# For raw WebSocket clients (like this tool), connect to /ws/websocket
+# You must send STOMP frames.
+
+WEBSOCKET ws://localhost:8080/ws/websocket
+Authorization: Bearer {{authToken}}
+
+### STOMP Connect
+# You might need to manually construct the CONNECT frame.
+# This tool might not support the null byte required for STOMP frames.
+# Frame format:
+# CONNECT
+# accept-version:1.2,1.1,1.0
+# heart-beat:10000,10000
+#
+# \u0000 (Null byte)
+
+### Subscribe to Chat Topic
+# SUBSCRIBE
+# id:sub-0
+# destination:/topic/chats/{{chatId}}
+#
+# \u0000
+
+### Send a Message
+# SEND
+# destination:/app/chat.sendMessage/{{chatId}}
+# content-type:application/json
+#
+# {"content": "Hello via WebSocket"}
+# \u0000
+
+### Send Typing Indicator
+# SEND
+# destination:/app/chat.typing/{{chatId}}
+# content-type:application/json
+#
+# {"isTyping": true}
+# \u0000

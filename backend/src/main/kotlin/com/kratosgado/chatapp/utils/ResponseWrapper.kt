@@ -1,5 +1,6 @@
 package com.kratosgado.chatapp.utils
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -12,7 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 
 @ControllerAdvice
-class ResponseWrapper : ResponseBodyAdvice<Any> {
+class ResponseWrapper(private val objectMapper: ObjectMapper) : ResponseBodyAdvice<Any> {
     companion object {
         private val IGNORED_PATHS = listOf("/docs/**", "/swagger-ui.html", "/swagger-ui/**")
     }
@@ -39,7 +40,10 @@ class ResponseWrapper : ResponseBodyAdvice<Any> {
         request: ServerHttpRequest,
         response: ServerHttpResponse,
     ): Any? {
-        if (body is String) return ApiResponse.ok(body)
+        if (body is String) {
+            response.headers.contentType = MediaType.APPLICATION_JSON
+            return objectMapper.writeValueAsString(ApiResponse.ok(body))
+        }
 
         if (body is ApiResponse) return body
 

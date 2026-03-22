@@ -19,12 +19,6 @@ spring:
       ddl-auto: update
     show-sql: true
     open-in-view: false
-  devtools:
-    restart:
-      enabled: true
-    livereload:
-      enabled: true
-      port: 35729
 security:
   jwt:
     secret-key: ${JWT_SECRET_KEY:940ff3dce8ce688ebb9cd5c866cedd3b3d423d5ca31342d06402569949991832}
