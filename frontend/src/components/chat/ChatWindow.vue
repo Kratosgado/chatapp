@@ -2,12 +2,14 @@
 import { ref, watch, nextTick, onMounted } from "vue";
 import { useChatsStore } from "@/stores/chats";
 import { useAuthStore } from "@/stores/auth";
+import { useCallsStore } from "@/stores/calls";
 import { storeToRefs } from "pinia";
 import type { ChatRoom, Message } from "@/types";
 import TypingIndicator from "./TypingIndicator.vue";
 
 const chatsStore = useChatsStore();
 const authStore = useAuthStore();
+const callsStore = useCallsStore();
 const { currentChat, messages, loading } = storeToRefs(chatsStore);
 const { user } = storeToRefs(authStore);
 
@@ -34,6 +36,20 @@ function handleTyping() {
   setTimeout(() => {
     chatsStore.sendTyping(currentChat.value!.id, false);
   }, 2000);
+}
+
+function startCall() {
+  if (!currentChat.value || !user.value) return;
+  // Simple logic for 1-on-1: find the member who is not me
+  const otherMember = currentChat.value.members.find(
+    (m) => m.id !== user.value?.id,
+  );
+  if (otherMember) {
+    callsStore.startCall(otherMember.id);
+  } else {
+    // Maybe group chat? Just pick first for now or warn
+    console.warn("Cannot identify call target");
+  }
 }
 
 function scrollToBottom() {
@@ -99,7 +115,12 @@ function getAvatar(message: Message) {
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <UButton icon="i-heroicons-phone" color="gray" variant="ghost" />
+        <UButton
+          icon="i-heroicons-phone"
+          color="gray"
+          variant="ghost"
+          @click="startCall"
+        />
         <UButton
           icon="i-heroicons-information-circle"
           color="gray"
