@@ -21,8 +21,9 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val authHeader = request.getHeader("Authorization")
-        val token = authHeader?.removePrefix("Bearer ")
+        val cookies = request.cookies
+        val jwtCookie = cookies?.find { it.name == "jwt" }
+        val token = jwtCookie?.value
 
         if (token != null && jwtService.validateToken(token)) {
             val userId = jwtService.getUserIdFromToken(token)

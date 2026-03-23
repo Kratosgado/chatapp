@@ -11,10 +11,16 @@ start)
 exit)
   # Example: Stop docker containers, cleanup, etc.
   docker stop postgis
+  pkill -f "gradlew"
+  pkill -f "pnpm dev"
   ;;
 run)
   [ "$COMPONENT" != "api" ] && cd frontend && pnpm dev &
-  [ "$COMPONENT" != "ui" ] && cd backend && ./gradlew bootRun
+  [ "$COMPONENT" != "ui" ] && {
+    cd backend
+    ./gradlew classes --continuous &
+    ./gradlew bootRun
+  }
   ;;
 build)
   [ "$COMPONENT" != "api" ] && cd frontend && pnpm build
