@@ -6,6 +6,7 @@ import com.kratosgado.chatapp.auth.dto.RegisterDto
 import com.kratosgado.chatapp.users.User
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,17 +17,20 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController(
     private val authService: AuthService,
 ) {
+    private val logger = LoggerFactory.getLogger(AuthController::class.java)
 
     @PostMapping("/login")
     fun login(
         @RequestBody @Valid dto: LoginDto,
         res: HttpServletResponse,
     ): LoginResponseDto {
-        return authService.login(dto)
+        logger.info("logging in user {}", dto.email)
+        return authService.login(dto, res)
     }
 
     @PostMapping("/logout")
     fun logout(res: HttpServletResponse) {
+        logger.info("logging out user")
         authService.logout(res)
     }
 
@@ -35,6 +39,7 @@ class AuthController(
         @RequestBody @Valid dto: RegisterDto,
         res: HttpServletResponse,
     ): User {
-        return authService.register(dto)
+        logger.info("registering user {}", dto)
+        return authService.register(dto, res)
     }
 }
