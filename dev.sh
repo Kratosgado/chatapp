@@ -18,6 +18,7 @@ run)
   [ "$COMPONENT" != "api" ] && cd frontend && pnpm dev &
   [ "$COMPONENT" != "ui" ] && {
     cd backend
+    # ./gradlew classes --continuous --quiet >/dev/null 2>&1 &
     ./gradlew classes --continuous &
     ./gradlew bootRun
   }

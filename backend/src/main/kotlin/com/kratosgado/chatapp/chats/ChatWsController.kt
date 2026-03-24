@@ -25,8 +25,8 @@ class ChatWsController(
         @Payload request: SendMessageDto,
         principal: Principal,
     ) {
-        val user = (principal as UsernamePasswordAuthenticationToken).principal as User
-        val message = chatService.sendMessage(user.id!!, chatId, request.content)
+        val userId = (principal as UsernamePasswordAuthenticationToken).principal as String
+        val message = chatService.sendMessage(userId, chatId, request.content)
         messagingTemplate.convertAndSend("/topic/chats/$chatId", message)
     }
 
@@ -36,8 +36,8 @@ class ChatWsController(
         @Payload request: TypingDto,
         principal: Principal,
     ) {
-        val user = (principal as UsernamePasswordAuthenticationToken).principal as User
-        val payload = mapOf("userId" to user.id, "isTyping" to request.isTyping)
+        val userId = (principal as UsernamePasswordAuthenticationToken).principal as String
+        val payload = mapOf("userId" to userId, "isTyping" to request.isTyping)
         messagingTemplate.convertAndSend("/topic/chats/$chatId/typing", payload)
     }
 }

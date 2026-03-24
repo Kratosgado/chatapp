@@ -16,9 +16,9 @@ class CallWsController(
 
     @MessageMapping("/call.offer")
     fun sendOffer(@Payload offer: CallOfferDto, principal: Principal) {
-        val user = (principal as UsernamePasswordAuthenticationToken).principal as User
-        val secureOffer = offer.copy(callerId = user.id!!)
-        
+        val userId = (principal as UsernamePasswordAuthenticationToken).principal as String
+        val secureOffer = offer.copy(callerId = userId)
+
         messagingTemplate.convertAndSendToUser(
             offer.targetUserId,
             "/queue/calls",
@@ -28,9 +28,9 @@ class CallWsController(
 
     @MessageMapping("/call.answer")
     fun sendAnswer(@Payload answer: CallAnswerDto, principal: Principal) {
-        val user = (principal as UsernamePasswordAuthenticationToken).principal as User
-        val secureAnswer = answer.copy(responderId = user.id!!)
-        
+        val userId = (principal as UsernamePasswordAuthenticationToken).principal as String
+        val secureAnswer = answer.copy(responderId = userId)
+
         messagingTemplate.convertAndSendToUser(
             answer.callerId,
             "/queue/calls",

@@ -18,14 +18,14 @@ class UserController(
 ) {
     @GetMapping("/me")
     fun getCurrentUser(
-        @AuthenticationPrincipal user: User,
-    ): UserDto = userService.getUserById(user.id!!)
+        @AuthenticationPrincipal userId: String,
+    ): UserDto = userService.getUserById(userId)
 
     @PutMapping("/me")
     fun updateProfile(
-        @AuthenticationPrincipal user: User,
+        @AuthenticationPrincipal userId: String,
         @RequestBody dto: UpdateProfileDto,
-    ): UserDto = userService.updateProfile(user.id!!, dto)
+    ): UserDto = userService.updateProfile(userId, dto)
 
     @GetMapping("/{id}")
     fun getUser(

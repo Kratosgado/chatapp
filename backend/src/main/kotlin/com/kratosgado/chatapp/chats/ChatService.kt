@@ -53,8 +53,10 @@ class ChatService(
         chatId: String,
         pageable: Pageable,
     ): List<MessageDto> {
+        var user = userRepo.getReferenceById(userId)
+        var chatRoom = chatRoomRepo.getReferenceById(chatId)
 
-        if (chatRoomMemberRepo.existsByUserIdAndChatRoomId(userId, chatId)) {
+        if (!chatRoomMemberRepo.existsByUserAndChatRoom(user, chatRoom)) {
             throw ApiException.forbidden("Not a member")
         }
 
@@ -70,15 +72,13 @@ class ChatService(
         chatId: String,
         content: String,
     ): MessageDto {
-        val user = userRepo.findById(userId).orElseThrow { ApiException.notFound("User not found") }
-        val chatRoom = chatRoomRepo.findById(chatId).orElseThrow { ApiException.notFound("Chat not found") }
+        val user = userRepo.getReferenceById(userId)
+        val chatRoom = chatRoomRepo.getReferenceById(chatId)
 
-        // remove check
-        if (!chatRoom.members.any { it.user.id.equals(userId) }) {
+        if (!chatRoomMemberRepo.existsByUserAndChatRoom(user, chatRoom)) {
             throw ApiException.forbidden("Not a member")
         }
 
-        // TODO: create by setting userId insttead of user
         val message = Message(chatRoom, user, content)
         messageRepo.save(message)
 

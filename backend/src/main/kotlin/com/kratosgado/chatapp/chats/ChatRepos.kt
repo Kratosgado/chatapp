@@ -17,7 +17,7 @@ interface ChatRoomMemberRepo : JpaRepository<ChatRoomMember, String> {
     fun findByUserId(userId: String): List<ChatRoomMember>
     fun findByChatRoomId(chatRoomId: String): List<ChatRoomMember>
 
-    fun existsByUserIdAndChatRoomId(userId: String, chatRoomId: String): Boolean
+    fun existsByUserAndChatRoom(user: User, chatRoom: ChatRoom): Boolean
 
 }
 

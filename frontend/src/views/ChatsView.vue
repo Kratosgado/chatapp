@@ -14,11 +14,15 @@ const isSidebarOpen = ref(false);
     </div>
 
     <!-- Mobile Sidebar (Slideover) -->
-    <USlideover v-model="isSidebarOpen" side="left" :ui="{ width: 'w-80' }">
+    <UDrawer
+      v-model:open="isSidebarOpen"
+      direction="left"
+      :ui="{ width: 'w-80' }"
+    >
       <template #content>
         <Sidebar />
       </template>
-    </USlideover>
+    </UDrawer>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col min-w-0 h-full relative">

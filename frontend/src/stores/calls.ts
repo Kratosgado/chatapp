@@ -48,7 +48,7 @@ export const useCallsStore = defineStore("calls", () => {
   const localStream = ref<MediaStream | null>(null);
   const remoteStream = ref<MediaStream | null>(null);
   const isAudioEnabled = ref(true);
-  
+
   // RTCPeerConnection instance
   let peerConnection: RTCPeerConnection | null = null;
   let callSubscription: StompSubscription | null = null;
@@ -56,7 +56,7 @@ export const useCallsStore = defineStore("calls", () => {
   // Cleanup function
   const resetCall = () => {
     if (localStream.value) {
-      localStream.value.getTracks().forEach(track => track.stop());
+      localStream.value.getTracks().forEach((track) => track.stop());
       localStream.value = null;
     }
     if (peerConnection) {
@@ -69,11 +69,11 @@ export const useCallsStore = defineStore("calls", () => {
     currentCallId.value = null;
     isAudioEnabled.value = true;
   };
-  
+
   const toggleAudio = () => {
     if (localStream.value) {
       isAudioEnabled.value = !isAudioEnabled.value;
-      localStream.value.getAudioTracks().forEach(track => {
+      localStream.value.getAudioTracks().forEach((track) => {
         track.enabled = isAudioEnabled.value;
       });
     }
@@ -81,9 +81,7 @@ export const useCallsStore = defineStore("calls", () => {
 
   const setupPeerConnection = () => {
     const config: RTCConfiguration = {
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" }
-      ]
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     };
     peerConnection = new RTCPeerConnection(config);
 
@@ -95,7 +93,7 @@ export const useCallsStore = defineStore("calls", () => {
           candidate: event.candidate.candidate,
           sdpMid: event.candidate.sdpMid,
           sdpMLineIndex: event.candidate.sdpMLineIndex,
-          type: "ice-candidate"
+          type: "ice-candidate",
         };
         sendMessage("/app/call.ice", candidateDto);
       }
@@ -104,10 +102,10 @@ export const useCallsStore = defineStore("calls", () => {
     peerConnection.ontrack = (event) => {
       remoteStream.value = event.streams[0] || null;
     };
-    
+
     // Add local tracks
     if (localStream.value) {
-      localStream.value.getTracks().forEach(track => {
+      localStream.value.getTracks().forEach((track) => {
         peerConnection?.addTrack(track, localStream.value!);
       });
     }
@@ -115,11 +113,12 @@ export const useCallsStore = defineStore("calls", () => {
 
   const initialize = () => {
     if (!user.value) return;
-    
+
+    console.log("Initializing calls...");
     // Subscribe to signaling queue
     callSubscription = subscribe("/user/queue/calls", async (message: any) => {
       console.log("Received call signal:", message);
-      
+
       switch (message.type) {
         case "offer":
           handleOffer(message);
@@ -144,10 +143,12 @@ export const useCallsStore = defineStore("calls", () => {
       currentCallId.value = `${user.value?.id}-${targetId}-${Date.now()}`;
 
       // Get user media
-      localStream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+      localStream.value = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
       setupPeerConnection();
-      
+
       const offer = await peerConnection!.createOffer();
       await peerConnection!.setLocalDescription(offer);
 
@@ -156,9 +157,9 @@ export const useCallsStore = defineStore("calls", () => {
         callerId: user.value!.id,
         targetUserId: targetId,
         sdp: offer.sdp!,
-        type: "offer"
+        type: "offer",
       };
-      
+
       sendMessage("/app/call.offer", offerDto);
     } catch (err) {
       console.error("Failed to start call", err);
@@ -173,7 +174,7 @@ export const useCallsStore = defineStore("calls", () => {
         callId: "unknown",
         targetUserId: offer.callerId,
         action: "BUSY",
-        type: "call-action"
+        type: "call-action",
       };
       sendMessage("/app/call.action", action);
       return;
@@ -195,15 +196,19 @@ export const useCallsStore = defineStore("calls", () => {
       currentCallId.value = "accepted-call"; // Should ideally come from offer
 
       // Get user media
-      localStream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+      localStream.value = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
       setupPeerConnection();
 
       const sdp = sessionStorage.getItem("pendingOfferSdp");
       if (!sdp) return;
 
-      await peerConnection!.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp }));
-      
+      await peerConnection!.setRemoteDescription(
+        new RTCSessionDescription({ type: "offer", sdp }),
+      );
+
       const answer = await peerConnection!.createAnswer();
       await peerConnection!.setLocalDescription(answer);
 
@@ -212,9 +217,9 @@ export const useCallsStore = defineStore("calls", () => {
         callerId: remoteUserId.value,
         responderId: user.value!.id,
         sdp: answer.sdp!,
-        type: "answer"
+        type: "answer",
       };
-      
+
       sendMessage("/app/call.answer", answerDto);
     } catch (err) {
       console.error("Failed to accept call", err);
@@ -228,7 +233,7 @@ export const useCallsStore = defineStore("calls", () => {
         callId: "unknown",
         targetUserId: remoteUserId.value,
         action: "REJECT",
-        type: "call-action"
+        type: "call-action",
       };
       sendMessage("/app/call.action", action);
     }
@@ -241,7 +246,7 @@ export const useCallsStore = defineStore("calls", () => {
         callId: currentCallId.value || "unknown",
         targetUserId: remoteUserId.value,
         action: "END",
-        type: "call-action"
+        type: "call-action",
       };
       sendMessage("/app/call.action", action);
     }
@@ -251,18 +256,22 @@ export const useCallsStore = defineStore("calls", () => {
   const handleAnswer = async (answer: CallAnswerDto) => {
     if (callState.value === "calling") {
       callState.value = "connected";
-      await peerConnection!.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: answer.sdp }));
+      await peerConnection!.setRemoteDescription(
+        new RTCSessionDescription({ type: "answer", sdp: answer.sdp }),
+      );
     }
   };
 
   const handleIceCandidate = async (dto: IceCandidateDto) => {
     if (peerConnection) {
       try {
-        await peerConnection.addIceCandidate(new RTCIceCandidate({
-          candidate: dto.candidate,
-          sdpMid: dto.sdpMid,
-          sdpMLineIndex: dto.sdpMLineIndex
-        }));
+        await peerConnection.addIceCandidate(
+          new RTCIceCandidate({
+            candidate: dto.candidate,
+            sdpMid: dto.sdpMid,
+            sdpMLineIndex: dto.sdpMLineIndex,
+          }),
+        );
       } catch (e) {
         console.error("Error adding ICE candidate", e);
       }
@@ -270,7 +279,11 @@ export const useCallsStore = defineStore("calls", () => {
   };
 
   const handleCallAction = (action: CallActionDto) => {
-    if (action.action === "END" || action.action === "REJECT" || action.action === "BUSY") {
+    if (
+      action.action === "END" ||
+      action.action === "REJECT" ||
+      action.action === "BUSY"
+    ) {
       // Show notification if needed
       if (action.action === "BUSY") {
         alert("User is busy");
@@ -280,18 +293,22 @@ export const useCallsStore = defineStore("calls", () => {
   };
 
   // Watch for login/logout to subscribe/unsubscribe
-  watch(user, (newUser) => {
-    if (newUser) {
-      // Delay slightly to ensure socket is connected
-      setTimeout(initialize, 1000);
-    } else {
-      if (callSubscription) {
-        callSubscription.unsubscribe();
-        callSubscription = null;
+  watch(
+    user,
+    (newUser) => {
+      if (newUser) {
+        // Delay slightly to ensure socket is connected
+        setTimeout(initialize, 1000);
+      } else {
+        if (callSubscription) {
+          callSubscription.unsubscribe();
+          callSubscription = null;
+        }
+        resetCall();
       }
-      resetCall();
-    }
-  }, { immediate: true });
+    },
+    { immediate: true },
+  );
 
   return {
     callState,
@@ -303,6 +320,6 @@ export const useCallsStore = defineStore("calls", () => {
     acceptCall,
     declineCall,
     endCall,
-    toggleAudio
+    toggleAudio,
   };
 });
