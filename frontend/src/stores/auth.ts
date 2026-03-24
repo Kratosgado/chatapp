@@ -8,10 +8,17 @@ import type { LoginResponse, User } from "@/types";
 import { useStorage } from "@vueuse/core";
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = useStorage("user", null as User | null);
+  const user = useStorage("user", {
+    id: "",
+    name: "",
+    email: "",
+    avatarUrl: "",
+  } as User);
   const token = useStorage("chat-token", null as string | null);
   const isAuthenticated = ref(false);
 
+  console.log("user", user.value?.name);
+  console.log("token", token.value);
   const login = async (email: string, password: string) => {
     try {
       const response: LoginResponse = await loginService(email, password);

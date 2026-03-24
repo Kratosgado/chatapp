@@ -22,7 +22,7 @@ class LoggingAspect {
         "within(@org.springframework.stereotype.Repository *)" +
                 " || within(@org.springframework.stereotype.Service *)" +
                 " || within(@org.springframework.web.bind.annotation.RestController *)" +
-                // " || within(@org.springframework.stereotype.Controller *)" +
+                " || within(@org.springframework.stereotype.Controller *)" +
                 " || execution(* com.kratosgado.chatapp..*Repository.*(..))",
     )
     fun springBeanPointcut() {

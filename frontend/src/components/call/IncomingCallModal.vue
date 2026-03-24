@@ -24,7 +24,7 @@ const callerName = computed(() => {
 });
 </script>
 <template>
-  <UModal v-model="isOpen" :prevent-close="true">
+  <UModal :open="isOpen" :prevent-close="true">
     <template #content>
       <UCard>
         <template #header>
