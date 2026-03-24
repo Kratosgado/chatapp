@@ -1,7 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 import { useAuthStore } from "./auth";
-import client, { sendMessage, subscribe } from "@/services/websocket";
+import client, { sendMessage, subscribe, isConnected } from "@/services/websocket";
 import type { StompSubscription } from "@stomp/stompjs";
 
 interface CallOfferDto {
@@ -112,7 +112,8 @@ export const useCallsStore = defineStore("calls", () => {
   };
 
   const initialize = () => {
-    if (!user.value) return;
+    if (!user.value || !isConnected.value) return;
+    if (callSubscription) return;
 
     // Subscribe to signaling queue
     callSubscription = subscribe("/user/queue/calls", async (message: any) => {
@@ -293,11 +294,10 @@ export const useCallsStore = defineStore("calls", () => {
 
   // Watch for login/logout to subscribe/unsubscribe
   watch(
-    user,
-    (newUser) => {
-      if (newUser) {
-        // Delay slightly to ensure socket is connected
-        setTimeout(initialize, 1000);
+    [user, isConnected],
+    ([newUser, connected]) => {
+      if (newUser && connected) {
+        initialize();
       } else {
         if (callSubscription) {
           callSubscription.unsubscribe();

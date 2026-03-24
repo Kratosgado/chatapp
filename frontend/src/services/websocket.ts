@@ -1,4 +1,7 @@
 import { Client } from "@stomp/stompjs";
+import { ref } from "vue";
+
+export const isConnected = ref(false);
 
 const client = new Client({
   brokerURL: "ws://localhost:8080/ws/websocket", // Standard WebSocket URL for SockJS endpoint
@@ -10,6 +13,7 @@ const client = new Client({
 
 client.onConnect = (frame) => {
   console.log("Connected: " + frame);
+  isConnected.value = true;
 };
 
 client.onStompError = (frame) => {
@@ -17,8 +21,18 @@ client.onStompError = (frame) => {
   console.error("Additional details: " + frame.body);
 };
 
-export const connect = () => {
+client.onWebSocketClose = () => {
+  isConnected.value = false;
+  console.log("Disconnected");
+};
+
+export const connect = (token?: string) => {
   if (!client.active) {
+    if (token) {
+      client.connectHeaders = {
+        Authorization: `Bearer ${token}`,
+      };
+    }
     client.activate();
   }
 };
@@ -26,6 +40,7 @@ export const connect = () => {
 export const disconnect = () => {
   if (client.active) {
     client.deactivate();
+    isConnected.value = false;
   }
 };
 
