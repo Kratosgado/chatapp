@@ -17,8 +17,6 @@ export const useAuthStore = defineStore("auth", () => {
   const token = useStorage("chat-token", null as string | null);
   const isAuthenticated = ref(false);
 
-  console.log("user", user.value?.name);
-  console.log("token", token.value);
   const login = async (email: string, password: string) => {
     try {
       const response: LoginResponse = await loginService(email, password);

@@ -114,7 +114,6 @@ export const useCallsStore = defineStore("calls", () => {
   const initialize = () => {
     if (!user.value) return;
 
-    console.log("Initializing calls...");
     // Subscribe to signaling queue
     callSubscription = subscribe("/user/queue/calls", async (message: any) => {
       console.log("Received call signal:", message);
