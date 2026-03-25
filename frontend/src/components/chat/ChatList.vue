@@ -12,7 +12,6 @@ const { chats, currentChat } = storeToRefs(chatsStore);
 const { user } = storeToRefs(authStore);
 
 const searchQuery = ref("");
-const showNewChatDialog = ref(false);
 
 const filteredChats = computed(() => {
   if (!searchQuery.value) return chats.value;
@@ -57,7 +56,7 @@ function formatTime(dateString: string) {
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Chats</h2>
 
-        <NewChatDialog v-model="showNewChatDialog" />
+        <NewChatDialog />
       </div>
       <UInput
         v-model="searchQuery"

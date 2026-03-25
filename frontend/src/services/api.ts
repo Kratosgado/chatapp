@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const toast = useToast();
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
   withCredentials: true, // Important for sending cookies
@@ -12,8 +14,14 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response) {
+      toast.add({
+        title: error.response.data.status,
+        description: error.response.data.message,
+        color: "error",
+      });
       if (
+        error.response.status === 401 &&
         window.location.pathname !== "/login" &&
         window.location.pathname !== "/register"
       ) {

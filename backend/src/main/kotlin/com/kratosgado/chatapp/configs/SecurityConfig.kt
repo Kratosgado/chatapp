@@ -1,10 +1,13 @@
 package com.kratosgado.chatapp.configs
 
+import com.kratosgado.chatapp.users.UserRepo
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
@@ -16,6 +19,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
+    @Bean
+    fun userDetailsService(userRepo: UserRepo): UserDetailsService {
+        return UserDetailsService { email ->
+            val user = userRepo.findByEmail(email)
+                ?: throw UsernameNotFoundException("User not found")
+
+            org.springframework.security.core.userdetails.User
+                .withUsername(user.email)
+                .password(user.password)
+                .roles("USER")
+                .build()
+        }
+    }
+
     @Bean
     fun filterChain(
         http: HttpSecurity,

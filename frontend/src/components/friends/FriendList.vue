@@ -6,7 +6,6 @@ import AddFriendDialog from "@/components/ui/AddFriendDialog.vue";
 
 const friendsStore = useFriendsStore();
 const { friends, requests } = storeToRefs(friendsStore);
-const showAddFriendDialog = ref(false);
 
 onMounted(() => {
   friendsStore.fetchFriends();
@@ -37,7 +36,7 @@ function handleReject(requestId: string) {
     >
       <h2 class="text-xl font-bold text-gray-900 dark:text-white">Friends</h2>
 
-      <AddFriendDialog v-model="showAddFriendDialog" />
+      <AddFriendDialog />
     </div>
 
     <!-- Requests -->
