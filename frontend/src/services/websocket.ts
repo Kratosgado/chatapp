@@ -4,7 +4,9 @@ import { ref } from "vue";
 export const isConnected = ref(false);
 
 const client = new Client({
-  brokerURL: "ws://localhost:8080/ws/websocket", // Standard WebSocket URL for SockJS endpoint
+  brokerURL:
+    import.meta.env.VITE_WEBSOCKET_BROKER_URL ||
+    "ws://localhost:8080/ws/websocket", // Standard WebSocket URL for SockJS endpoint
   // connectionTimeout: 10000,
   reconnectDelay: 5000,
   heartbeatIncoming: 4000,

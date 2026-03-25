@@ -17,10 +17,6 @@ async function onSubmit({ data }: FormSubmitEvent<Schema>) {
     await authStore.login(data.email, data.password);
     router.push("/chats");
   } catch (err: any) {
-    toast.add({
-      title: "Login failed",
-      description: err.response?.data?.message || err.message,
-    });
   } finally {
     loading.value = false;
   }

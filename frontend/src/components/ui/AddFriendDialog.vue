@@ -1,24 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { z } from "zod";
 import { useFriendsStore } from "@/stores/friends";
 import { useAuthStore } from "@/stores/auth";
 import { searchUsers } from "@/services/user";
 
-const props = defineProps<{
-  modelValue: boolean;
-}>();
-
-const emit = defineEmits<{
-  (e: "update:modelValue", value: boolean): void;
-}>();
-
-const isOpen = computed({
-  get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
-});
-
-import { computed } from "vue";
+const open = ref(false);
 
 const friendsStore = useFriendsStore();
 const authStore = useAuthStore();
@@ -42,7 +28,7 @@ async function handleSearch() {
 async function handleAdd(user: any) {
   try {
     await friendsStore.sendRequest(user.id);
-    isOpen.value = false;
+    open.value = false;
   } catch (error) {
     console.error("Failed to add friend:", error);
   }
@@ -50,12 +36,13 @@ async function handleAdd(user: any) {
 </script>
 
 <template>
-  <UModal v-model="isOpen">
+  <UModal v-model="open">
     <UButton
       icon="i-heroicons-user-plus"
       color="gray"
       variant="ghost"
       size="sm"
+      @click="open = true"
     />
     <template #content>
       <UCard>
@@ -66,13 +53,6 @@ async function handleAdd(user: any) {
             >
               Add Friend
             </h3>
-            <UButton
-              color="gray"
-              variant="ghost"
-              icon="i-heroicons-x-mark-20-solid"
-              class="-my-1"
-              @click="isOpen = false"
-            />
           </div>
         </template>
 

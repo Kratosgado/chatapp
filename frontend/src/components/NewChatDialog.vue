@@ -5,9 +5,10 @@ import { useFriendsStore } from "@/stores/friends";
 import { useChatsStore } from "@/stores/chats";
 import { storeToRefs } from "pinia";
 
-const emit = defineEmits<{
-  (e: "update:modelValue", value: boolean): void;
-}>();
+const open = ref(false);
+// defineShortcuts({
+//   shift_n: () => (open.value = true),
+// });
 
 const friendsStore = useFriendsStore();
 const chatsStore = useChatsStore();
@@ -37,6 +38,7 @@ async function createChat() {
     state.value = { type: "direct", users: [], groupName: "" };
     // Ideally select the new chat
     chatsStore.fetchChats();
+    open.value = false;
   } catch (error) {
     console.error("Failed to create chat:", error);
   }
@@ -44,10 +46,15 @@ async function createChat() {
 </script>
 
 <template>
-  <UModal>
+  <UModal v-model="open">
     <UButton icon="i-heroicons-plus" color="gray" variant="ghost" size="sm" />
     <template #content>
-      <UCard title="Start New Chat">
+      <UCard>
+        <template #header>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+            Start New Chat
+          </h2>
+        </template>
         <UForm
           :schema="chatSchema"
           :state="state"
@@ -94,12 +101,12 @@ async function createChat() {
           >
             <UInput v-model="state.groupName" placeholder="My Group" />
           </UFormField>
-
+        </UForm>
+        <template #footer>
           <div class="flex justify-end gap-2">
-            <UButton color="gray" variant="soft">Cancel</UButton>
             <UButton type="submit" color="primary">Create</UButton>
           </div>
-        </UForm>
+        </template>
       </UCard>
     </template>
   </UModal>

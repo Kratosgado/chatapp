@@ -4,35 +4,35 @@ The application uses WebRTC for real-time audio/video calls.
 
 ## Signaling Flow
 
-1.  **Start Call**:
-    -   Caller creates `RTCPeerConnection`.
-    -   Gets local media stream (`navigator.mediaDevices.getUserMedia`).
-    -   Creates Offer (`pc.createOffer()`).
-    -   Sends Offer via WebSocket (`/app/call.offer`).
+1. **Start Call**:
+    - Caller creates `RTCPeerConnection`.
+    - Gets local media stream (`navigator.mediaDevices.getUserMedia`).
+    - Creates Offer (`pc.createOffer()`).
+    - Sends Offer via WebSocket (`/app/call.offer`).
 
-2.  **Incoming Call**:
-    -   Receiver subscribes to `/user/queue/calls`.
-    -   Receives `CallOfferDto`.
-    -   Opens `IncomingCallModal`.
-    -   Stores `sdp` (temporarily).
+2. **Incoming Call**:
+    - Receiver subscribes to `/user/queue/calls`.
+    - Receives `CallOfferDto`.
+    - Opens `IncomingCallModal`.
+    - Stores `sdp` (temporarily).
 
-3.  **Accept Call**:
-    -   Receiver accepts call.
-    -   Gets local media stream.
-    -   Creates `RTCPeerConnection`.
-    -   Sets Remote Description (from offer).
-    -   Creates Answer (`pc.createAnswer()`).
-    -   Sends Answer via WebSocket (`/app/call.answer`).
+3. **Accept Call**:
+    - Receiver accepts call.
+    - Gets local media stream.
+    - Creates `RTCPeerConnection`.
+    - Sets Remote Description (from offer).
+    - Creates Answer (`pc.createAnswer()`).
+    - Sends Answer via WebSocket (`/app/call.answer`).
 
-4.  **Answer Handling**:
-    -   Caller receives `CallAnswerDto`.
-    -   Sets Remote Description (from answer).
-    -   Connection established.
+4. **Answer Handling**:
+    - Caller receives `CallAnswerDto`.
+    - Sets Remote Description (from answer).
+    - Connection established.
 
-5.  **ICE Candidates**:
-    -   Peers exchange ICE candidates via `/app/call.ice`.
-    -   Candidates are added via `pc.addIceCandidate()`.
-    -   NAT traversal uses Google's STUN server (`stun:stun.l.google.com:19302`).
+5. **ICE Candidates**:
+    - Peers exchange ICE candidates via `/app/call.ice`.
+    - Candidates are added via `pc.addIceCandidate()`.
+    - NAT traversal uses Google's STUN server (`stun:stun.l.google.com:19302`).
 
 ## Data Structures
 
