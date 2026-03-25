@@ -1,5 +1,6 @@
 package com.kratosgado.chatapp.configs.aop
 
+import com.kratosgado.chatapp.utils.ApiException
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.AfterThrowing
@@ -48,6 +49,7 @@ class LoggingAspect {
         joinPoint: JoinPoint,
         e: Throwable,
     ) {
+        if (e is ApiException) return
         logger.error(
             "****Exception in {}.{}() with cause = {}",
             joinPoint.signature.declaringTypeName,
