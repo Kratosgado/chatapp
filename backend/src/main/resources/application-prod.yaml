@@ -1,0 +1,26 @@
+logging:
+  level:
+    com.kratosgado.chatapp: INFO
+    org.springframework.web: WARN
+server:
+  port: 8080
+
+spring:
+  application:
+    name: chatapp
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    expiration-time: ${JWT_EXPIRATION_TIME:36000000}
