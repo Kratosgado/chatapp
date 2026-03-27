@@ -5,6 +5,8 @@ import { useChatsStore } from "@/stores/chats";
 
 const callsStore = useCallsStore();
 const chatsStore = useChatsStore();
+const remoteVideo = ref<HTMLVideoElement | null>(null);
+const localVideo = ref<HTMLVideoElement | null>(null);
 const remoteAudio = ref<HTMLAudioElement | null>(null);
 
 const isActive = computed(
@@ -12,6 +14,8 @@ const isActive = computed(
     callsStore.callState === "calling" || callsStore.callState === "connected",
 );
 const isMuted = computed(() => !callsStore.isAudioEnabled);
+const isVideoOff = computed(() => !callsStore.isVideoEnabled);
+const isVideoCall = computed(() => callsStore.isCallWithVideo);
 
 const statusText = computed(() => {
   if (callsStore.callState === "calling") return "Calling...";
@@ -29,21 +33,54 @@ const callerName = computed(() => {
   return callsStore.remoteUserId;
 });
 
-// Watch remote stream and attach to audio element
+const callerAvatar = computed(() => {
+  if (!callsStore.remoteUserId) return "";
+  for (const chat of chatsStore.chats) {
+    const member = chat.members.find((m) => m.id === callsStore.remoteUserId);
+    if (member && member.avatarUrl) return member.avatarUrl;
+  }
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(callerName.value)}`;
+});
+
+// Watch remote stream and attach to video/audio element
 watch(
   () => callsStore.remoteStream,
   (stream) => {
-    if (remoteAudio.value && stream) {
+    if (isVideoCall.value && remoteVideo.value && stream) {
+      remoteVideo.value.srcObject = stream;
+    } else if (!isVideoCall.value && remoteAudio.value && stream) {
       remoteAudio.value.srcObject = stream;
     }
   },
   { immediate: true },
 );
 
-// Also check when component mounts if stream already exists (though v-if handles mount)
-watch(remoteAudio, (el) => {
-  if (el && callsStore.remoteStream) {
+watch(remoteVideo, (el) => {
+  if (el && callsStore.remoteStream && isVideoCall.value) {
     el.srcObject = callsStore.remoteStream;
+  }
+});
+
+watch(remoteAudio, (el) => {
+  if (el && callsStore.remoteStream && !isVideoCall.value) {
+    el.srcObject = callsStore.remoteStream;
+  }
+});
+
+// Watch local stream and attach to local video element
+watch(
+  () => callsStore.localStream,
+  (stream) => {
+    if (isVideoCall.value && localVideo.value && stream) {
+      localVideo.value.srcObject = stream;
+    }
+  },
+  { immediate: true },
+);
+
+watch(localVideo, (el) => {
+  if (el && callsStore.localStream && isVideoCall.value) {
+    el.srcObject = callsStore.localStream;
   }
 });
 </script>
@@ -51,16 +88,42 @@ watch(remoteAudio, (el) => {
 <template>
   <div
     v-if="isActive"
-    class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900/95 backdrop-blur-xl text-white transition-all duration-300"
+    class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900/95 backdrop-blur-xl text-white transition-all duration-300 overflow-hidden"
   >
-    <!-- Background Gradient Orb -->
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Background Gradient Orb (Only for audio calls) -->
+    <div v-if="!isVideoCall" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="relative z-10 flex flex-col items-center w-full max-w-md p-8 space-y-12">
+    <!-- Video Elements -->
+    <div v-if="isVideoCall" class="absolute inset-0 w-full h-full bg-black">
+      <!-- Remote Video -->
+      <video
+        ref="remoteVideo"
+        class="w-full h-full object-cover"
+        autoplay
+        playsinline
+      ></video>
+      
+      <!-- Local Video (PiP) -->
+      <div class="absolute top-6 right-6 w-32 md:w-48 aspect-video bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-white/10 z-20">
+        <video
+          ref="localVideo"
+          class="w-full h-full object-cover transform -scale-x-100"
+          autoplay
+          playsinline
+          muted
+        ></video>
+      </div>
+
+      <!-- Gradient Overlay for controls -->
+      <div class="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-gray-900/90 to-transparent pointer-events-none z-10"></div>
+    </div>
+
+    <div class="relative z-20 flex flex-col items-center w-full max-w-md p-8 space-y-12" :class="isVideoCall ? 'mt-auto pb-12' : ''">
       <!-- Caller Info -->
-      <div class="text-center space-y-4">
-        <div class="relative inline-block">
+      <div class="text-center space-y-4" :class="isVideoCall ? 'drop-shadow-lg' : ''">
+        <div v-if="!isVideoCall" class="relative inline-block">
           <UAvatar
+            :src="callerAvatar"
             :alt="callerName"
             size="3xl"
             class="mx-auto ring-4 ring-white/10 shadow-2xl"
@@ -75,20 +138,20 @@ watch(remoteAudio, (el) => {
         
         <div>
           <h3 class="text-3xl font-bold tracking-tight">{{ callerName }}</h3>
-          <p class="text-primary-200 font-medium mt-1 text-lg animate-pulse">
+          <p class="text-primary-200 font-medium mt-1 text-lg" :class="callsStore.callState === 'calling' ? 'animate-pulse' : ''">
             {{ statusText }}
           </p>
         </div>
       </div>
 
       <!-- Controls -->
-      <div class="flex items-center justify-center gap-8">
+      <div class="flex items-center justify-center gap-6 md:gap-8">
         <UButton
           :color="isMuted ? 'white' : 'gray'"
           :variant="isMuted ? 'solid' : 'ghost'"
           :icon="isMuted ? 'i-heroicons-microphone-slash' : 'i-heroicons-microphone'"
-          class="rounded-full w-14 h-14 flex items-center justify-center transition-transform active:scale-95"
-          :class="isMuted ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-white/10 text-white hover:bg-white/20'"
+          class="rounded-full w-14 h-14 flex items-center justify-center transition-transform active:scale-95 shadow-lg"
+          :class="isMuted ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700'"
           size="xl"
           @click="callsStore.toggleAudio()"
         />
@@ -103,18 +166,28 @@ watch(remoteAudio, (el) => {
           @click="callsStore.endCall()"
         />
         
-        <!-- Placeholder for future Video/Speaker toggle -->
         <UButton
+          v-if="isVideoCall"
+          :color="isVideoOff ? 'white' : 'gray'"
+          :variant="isVideoOff ? 'solid' : 'ghost'"
+          :icon="isVideoOff ? 'i-heroicons-video-camera-slash' : 'i-heroicons-video-camera'"
+          class="rounded-full w-14 h-14 flex items-center justify-center transition-transform active:scale-95 shadow-lg"
+          :class="isVideoOff ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700'"
+          size="xl"
+          @click="callsStore.toggleVideo()"
+        />
+        <UButton
+          v-else
           color="neutral"
           variant="ghost"
           icon="i-heroicons-speaker-wave"
-          class="rounded-full w-14 h-14 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-transform active:scale-95"
+          class="rounded-full w-14 h-14 flex items-center justify-center bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700 transition-transform active:scale-95 shadow-lg"
           size="xl"
         />
       </div>
     </div>
 
     <!-- Hidden audio element for remote stream -->
-    <audio ref="remoteAudio" autoplay></audio>
+    <audio v-if="!isVideoCall" ref="remoteAudio" autoplay></audio>
   </div>
 </template>

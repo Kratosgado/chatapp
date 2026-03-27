@@ -13,6 +13,8 @@ const isOpen = computed({
   },
 });
 
+const isVideoCall = computed(() => callsStore.isCallWithVideo);
+
 const callerName = computed(() => {
   if (!callsStore.remoteUserId) return "Unknown";
   // Try to find user in chats
@@ -21,6 +23,15 @@ const callerName = computed(() => {
     if (member) return member.name;
   }
   return callsStore.remoteUserId;
+});
+
+const callerAvatar = computed(() => {
+  if (!callsStore.remoteUserId) return "";
+  for (const chat of chatsStore.chats) {
+    const member = chat.members.find((m) => m.id === callsStore.remoteUserId);
+    if (member && member.avatarUrl) return member.avatarUrl;
+  }
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(callerName.value)}`;
 });
 </script>
 <template>
@@ -47,13 +58,14 @@ const callerName = computed(() => {
                 class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"
               ></span>
             </span>
-            Incoming Call
+            {{ isVideoCall ? 'Incoming Video Call' : 'Incoming Call' }}
           </div>
 
           <!-- Caller Info -->
           <div class="flex flex-col items-center text-center space-y-3">
             <div class="relative">
               <UAvatar
+                :src="callerAvatar"
                 :alt="callerName"
                 size="3xl"
                 class="mx-auto ring-4 ring-white dark:ring-gray-800 shadow-lg"
@@ -61,7 +73,7 @@ const callerName = computed(() => {
               <div
                 class="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white dark:border-gray-900"
               >
-                <UIcon name="i-heroicons-phone" class="w-4 h-4 text-white" />
+                <UIcon :name="isVideoCall ? 'i-heroicons-video-camera' : 'i-heroicons-phone'" class="w-4 h-4 text-white" />
               </div>
             </div>
 
@@ -94,7 +106,7 @@ const callerName = computed(() => {
               <UButton
                 color="success"
                 variant="solid"
-                icon="i-heroicons-phone"
+                :icon="isVideoCall ? 'i-heroicons-video-camera' : 'i-heroicons-phone'"
                 class="w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 animate-pulse"
                 size="xl"
                 :ui="{ rounded: 'rounded-full' }"

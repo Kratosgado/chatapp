@@ -10,6 +10,7 @@ interface CallOfferDto {
   targetUserId: string;
   sdp: string;
   type: "offer";
+  withVideo?: boolean;
 }
 
 interface CallAnswerDto {
@@ -48,6 +49,8 @@ export const useCallsStore = defineStore("calls", () => {
   const localStream = ref<MediaStream | null>(null);
   const remoteStream = ref<MediaStream | null>(null);
   const isAudioEnabled = ref(true);
+  const isVideoEnabled = ref(false);
+  const isCallWithVideo = ref(false);
 
   // RTCPeerConnection instance
   let peerConnection: RTCPeerConnection | null = null;
@@ -68,6 +71,8 @@ export const useCallsStore = defineStore("calls", () => {
     remoteUserId.value = null;
     currentCallId.value = null;
     isAudioEnabled.value = true;
+    isVideoEnabled.value = false;
+    isCallWithVideo.value = false;
   };
 
   const toggleAudio = () => {
@@ -75,6 +80,15 @@ export const useCallsStore = defineStore("calls", () => {
       isAudioEnabled.value = !isAudioEnabled.value;
       localStream.value.getAudioTracks().forEach((track) => {
         track.enabled = isAudioEnabled.value;
+      });
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream.value && isCallWithVideo.value) {
+      isVideoEnabled.value = !isVideoEnabled.value;
+      localStream.value.getVideoTracks().forEach((track) => {
+        track.enabled = isVideoEnabled.value;
       });
     }
   };
@@ -136,15 +150,18 @@ export const useCallsStore = defineStore("calls", () => {
     });
   };
 
-  const startCall = async (targetId: string) => {
+  const startCall = async (targetId: string, withVideo: boolean = false) => {
     try {
       callState.value = "calling";
       remoteUserId.value = targetId;
       currentCallId.value = `${user.value?.id}-${targetId}-${Date.now()}`;
+      isCallWithVideo.value = withVideo;
+      isVideoEnabled.value = withVideo;
 
       // Get user media
       localStream.value = await navigator.mediaDevices.getUserMedia({
         audio: true,
+        video: withVideo,
       });
 
       setupPeerConnection();
@@ -158,6 +175,7 @@ export const useCallsStore = defineStore("calls", () => {
         targetUserId: targetId,
         sdp: offer.sdp!,
         type: "offer",
+        withVideo,
       };
 
       sendMessage("/app/call.offer", offerDto);
@@ -182,10 +200,12 @@ export const useCallsStore = defineStore("calls", () => {
 
     callState.value = "incoming";
     remoteUserId.value = offer.callerId;
+    isCallWithVideo.value = offer.withVideo || false;
     // We store the offer temporarily? Or just act on it when accepted.
     // For now, let's just initialize the PC when accepted, but we need the SDP.
     // Let's store the pending offer SDP.
     sessionStorage.setItem("pendingOfferSdp", offer.sdp);
+    sessionStorage.setItem("pendingOfferVideo", offer.withVideo ? "true" : "false");
   };
 
   const acceptCall = async () => {
@@ -194,10 +214,14 @@ export const useCallsStore = defineStore("calls", () => {
     try {
       callState.value = "connected";
       currentCallId.value = "accepted-call"; // Should ideally come from offer
+      const withVideo = sessionStorage.getItem("pendingOfferVideo") === "true";
+      isCallWithVideo.value = withVideo;
+      isVideoEnabled.value = withVideo;
 
       // Get user media
       localStream.value = await navigator.mediaDevices.getUserMedia({
         audio: true,
+        video: withVideo,
       });
 
       setupPeerConnection();
@@ -315,10 +339,13 @@ export const useCallsStore = defineStore("calls", () => {
     localStream,
     remoteStream,
     isAudioEnabled,
+    isVideoEnabled,
+    isCallWithVideo,
     startCall,
     acceptCall,
     declineCall,
     endCall,
     toggleAudio,
+    toggleVideo,
   };
 });

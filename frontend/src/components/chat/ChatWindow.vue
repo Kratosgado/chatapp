@@ -38,14 +38,14 @@ function handleTyping() {
   }, 2000);
 }
 
-function startCall() {
+function startCall(withVideo = false) {
   if (!currentChat.value || !user.value) return;
   // Simple logic for 1-on-1: find the member who is not me
   const otherMember = currentChat.value.members.find(
     (m) => m.id !== user.value?.id,
   );
   if (otherMember) {
-    callsStore.startCall(otherMember.id);
+    callsStore.startCall(otherMember.id, withVideo);
   } else {
     // Maybe group chat? Just pick first for now or warn
     console.warn("Cannot identify call target");
@@ -116,10 +116,16 @@ function getAvatar(message: Message) {
       </div>
       <div class="flex items-center gap-2">
         <UButton
+          icon="i-heroicons-video-camera"
+          color="neutral"
+          variant="ghost"
+          @click="startCall(true)"
+        />
+        <UButton
           icon="i-heroicons-phone"
           color="neutral"
           variant="ghost"
-          @click="startCall"
+          @click="startCall(false)"
         />
         <UButton
           icon="i-heroicons-information-circle"
