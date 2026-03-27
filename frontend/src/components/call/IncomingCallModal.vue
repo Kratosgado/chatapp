@@ -6,15 +6,6 @@ import { useChatsStore } from "@/stores/chats";
 const callsStore = useCallsStore();
 const chatsStore = useChatsStore();
 
-const isOpen = computed({
-  get: () => callsStore.callState === "incoming",
-  set: (val) => {
-    // Cannot close directly without action
-  },
-});
-
-const isVideoCall = computed(() => callsStore.isCallWithVideo);
-
 const callerName = computed(() => {
   if (!callsStore.remoteUserId) return "Unknown";
   // Try to find user in chats
@@ -35,7 +26,7 @@ const callerAvatar = computed(() => {
 });
 </script>
 <template>
-  <UModal :open="isOpen" :prevent-close="true">
+  <UModal :open="callsStore.callState === 'incoming'" :prevent-close="true">
     <template #content>
       <div
         class="relative overflow-hidden bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-800"
@@ -58,7 +49,11 @@ const callerAvatar = computed(() => {
                 class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"
               ></span>
             </span>
-            {{ isVideoCall ? 'Incoming Video Call' : 'Incoming Call' }}
+            {{
+              callsStore.isCallWithVideo
+                ? "Incoming Video Call"
+                : "Incoming Call"
+            }}
           </div>
 
           <!-- Caller Info -->
@@ -73,7 +68,14 @@ const callerAvatar = computed(() => {
               <div
                 class="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white dark:border-gray-900"
               >
-                <UIcon :name="isVideoCall ? 'i-heroicons-video-camera' : 'i-heroicons-phone'" class="w-4 h-4 text-white" />
+                <UIcon
+                  :name="
+                    callsStore.isCallWithVideo
+                      ? 'i-heroicons-video-camera'
+                      : 'i-heroicons-phone'
+                  "
+                  class="w-4 h-4 text-white"
+                />
               </div>
             </div>
 
@@ -106,7 +108,11 @@ const callerAvatar = computed(() => {
               <UButton
                 color="success"
                 variant="solid"
-                :icon="isVideoCall ? 'i-heroicons-video-camera' : 'i-heroicons-phone'"
+                :icon="
+                  callsStore.isCallWithVideo
+                    ? 'i-heroicons-video-camera'
+                    : 'i-heroicons-phone'
+                "
                 class="w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 animate-pulse"
                 size="xl"
                 :ui="{ rounded: 'rounded-full' }"

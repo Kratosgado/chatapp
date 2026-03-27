@@ -1,7 +1,11 @@
 import { defineStore, storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 import { useAuthStore } from "./auth";
-import client, { sendMessage, subscribe, isConnected } from "@/services/websocket";
+import client, {
+  sendMessage,
+  subscribe,
+  isConnected,
+} from "@/services/websocket";
 import type { StompSubscription } from "@stomp/stompjs";
 
 interface CallOfferDto {
@@ -205,7 +209,10 @@ export const useCallsStore = defineStore("calls", () => {
     // For now, let's just initialize the PC when accepted, but we need the SDP.
     // Let's store the pending offer SDP.
     sessionStorage.setItem("pendingOfferSdp", offer.sdp);
-    sessionStorage.setItem("pendingOfferVideo", offer.withVideo ? "true" : "false");
+    sessionStorage.setItem(
+      "pendingOfferVideo",
+      offer.withVideo ? "true" : "false",
+    );
   };
 
   const acceptCall = async () => {

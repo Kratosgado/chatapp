@@ -13,9 +13,6 @@ const isActive = computed(
   () =>
     callsStore.callState === "calling" || callsStore.callState === "connected",
 );
-const isMuted = computed(() => !callsStore.isAudioEnabled);
-const isVideoOff = computed(() => !callsStore.isVideoEnabled);
-const isVideoCall = computed(() => callsStore.isCallWithVideo);
 
 const statusText = computed(() => {
   if (callsStore.callState === "calling") return "Calling...";
@@ -46,9 +43,9 @@ const callerAvatar = computed(() => {
 watch(
   () => callsStore.remoteStream,
   (stream) => {
-    if (isVideoCall.value && remoteVideo.value && stream) {
+    if (callsStore.isCallWithVideo && remoteVideo.value && stream) {
       remoteVideo.value.srcObject = stream;
-    } else if (!isVideoCall.value && remoteAudio.value && stream) {
+    } else if (!callsStore.isCallWithVideo && remoteAudio.value && stream) {
       remoteAudio.value.srcObject = stream;
     }
   },
@@ -56,13 +53,13 @@ watch(
 );
 
 watch(remoteVideo, (el) => {
-  if (el && callsStore.remoteStream && isVideoCall.value) {
+  if (el && callsStore.remoteStream && callsStore.isCallWithVideo) {
     el.srcObject = callsStore.remoteStream;
   }
 });
 
 watch(remoteAudio, (el) => {
-  if (el && callsStore.remoteStream && !isVideoCall.value) {
+  if (el && callsStore.remoteStream && !callsStore.isCallWithVideo) {
     el.srcObject = callsStore.remoteStream;
   }
 });
@@ -71,7 +68,7 @@ watch(remoteAudio, (el) => {
 watch(
   () => callsStore.localStream,
   (stream) => {
-    if (isVideoCall.value && localVideo.value && stream) {
+    if (callsStore.isCallWithVideo && localVideo.value && stream) {
       localVideo.value.srcObject = stream;
     }
   },
@@ -79,7 +76,7 @@ watch(
 );
 
 watch(localVideo, (el) => {
-  if (el && callsStore.localStream && isVideoCall.value) {
+  if (el && callsStore.localStream && callsStore.isCallWithVideo) {
     el.srcObject = callsStore.localStream;
   }
 });
@@ -91,10 +88,16 @@ watch(localVideo, (el) => {
     class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900/95 backdrop-blur-xl text-white transition-all duration-300 overflow-hidden"
   >
     <!-- Background Gradient Orb (Only for audio calls) -->
-    <div v-if="!isVideoCall" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div
+      v-if="!callsStore.isCallWithVideo"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"
+    ></div>
 
     <!-- Video Elements -->
-    <div v-if="isVideoCall" class="absolute inset-0 w-full h-full bg-black">
+    <div
+      v-if="callsStore.isCallWithVideo"
+      class="absolute inset-0 w-full h-full bg-black"
+    >
       <!-- Remote Video -->
       <video
         ref="remoteVideo"
@@ -102,9 +105,11 @@ watch(localVideo, (el) => {
         autoplay
         playsinline
       ></video>
-      
+
       <!-- Local Video (PiP) -->
-      <div class="absolute top-6 right-6 w-32 md:w-48 aspect-video bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-white/10 z-20">
+      <div
+        class="absolute top-6 right-6 w-32 md:w-48 aspect-video bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-white/10 z-20"
+      >
         <video
           ref="localVideo"
           class="w-full h-full object-cover transform -scale-x-100"
@@ -115,13 +120,21 @@ watch(localVideo, (el) => {
       </div>
 
       <!-- Gradient Overlay for controls -->
-      <div class="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-gray-900/90 to-transparent pointer-events-none z-10"></div>
+      <div
+        class="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-gray-900/90 to-transparent pointer-events-none z-10"
+      ></div>
     </div>
 
-    <div class="relative z-20 flex flex-col items-center w-full max-w-md p-8 space-y-12" :class="isVideoCall ? 'mt-auto pb-12' : ''">
+    <div
+      class="relative z-20 flex flex-col items-center w-full max-w-md p-8 space-y-12"
+      :class="callsStore.isCallWithVideo ? 'mt-auto pb-12' : ''"
+    >
       <!-- Caller Info -->
-      <div class="text-center space-y-4" :class="isVideoCall ? 'drop-shadow-lg' : ''">
-        <div v-if="!isVideoCall" class="relative inline-block">
+      <div
+        class="text-center space-y-4"
+        :class="callsStore.isCallWithVideo ? 'drop-shadow-lg' : ''"
+      >
+        <div v-if="!callsStore.isCallWithVideo" class="relative inline-block">
           <UAvatar
             :src="callerAvatar"
             :alt="callerName"
@@ -135,10 +148,13 @@ watch(localVideo, (el) => {
             class="absolute inset-0 rounded-full ring-4 ring-primary-500 animate-ping opacity-75"
           ></div>
         </div>
-        
+
         <div>
           <h3 class="text-3xl font-bold tracking-tight">{{ callerName }}</h3>
-          <p class="text-primary-200 font-medium mt-1 text-lg" :class="callsStore.callState === 'calling' ? 'animate-pulse' : ''">
+          <p
+            class="text-primary-200 font-medium mt-1 text-lg"
+            :class="callsStore.callState === 'calling' ? 'animate-pulse' : ''"
+          >
             {{ statusText }}
           </p>
         </div>
@@ -147,15 +163,23 @@ watch(localVideo, (el) => {
       <!-- Controls -->
       <div class="flex items-center justify-center gap-6 md:gap-8">
         <UButton
-          :color="isMuted ? 'white' : 'gray'"
-          :variant="isMuted ? 'solid' : 'ghost'"
-          :icon="isMuted ? 'i-heroicons-microphone-slash' : 'i-heroicons-microphone'"
+          :color="!callsStore.isAudioEnabled ? 'white' : 'gray'"
+          :variant="!callsStore.isAudioEnabled ? 'solid' : 'ghost'"
+          :icon="
+            !callsStore.isAudioEnabled
+              ? 'i-heroicons-microphone-slash'
+              : 'i-heroicons-microphone'
+          "
           class="rounded-full w-14 h-14 flex items-center justify-center transition-transform active:scale-95 shadow-lg"
-          :class="isMuted ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700'"
+          :class="
+            !callsStore.isAudioEnabled
+              ? 'bg-white text-gray-900 hover:bg-gray-100'
+              : 'bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700'
+          "
           size="xl"
           @click="callsStore.toggleAudio()"
         />
-        
+
         <UButton
           color="error"
           variant="solid"
@@ -165,14 +189,22 @@ watch(localVideo, (el) => {
           :ui="{ rounded: 'rounded-full' }"
           @click="callsStore.endCall()"
         />
-        
+
         <UButton
-          v-if="isVideoCall"
-          :color="isVideoOff ? 'white' : 'gray'"
-          :variant="isVideoOff ? 'solid' : 'ghost'"
-          :icon="isVideoOff ? 'i-heroicons-video-camera-slash' : 'i-heroicons-video-camera'"
+          v-if="callsStore.isCallWithVideo"
+          :color="!callsStore.isVideoEnabled ? 'white' : 'gray'"
+          :variant="!callsStore.isVideoEnabled ? 'solid' : 'ghost'"
+          :icon="
+            !callsStore.isVideoEnabled
+              ? 'i-heroicons-video-camera-slash'
+              : 'i-heroicons-video-camera'
+          "
           class="rounded-full w-14 h-14 flex items-center justify-center transition-transform active:scale-95 shadow-lg"
-          :class="isVideoOff ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700'"
+          :class="
+            !callsStore.isVideoEnabled
+              ? 'bg-white text-gray-900 hover:bg-gray-100'
+              : 'bg-gray-800/80 backdrop-blur text-white hover:bg-gray-700'
+          "
           size="xl"
           @click="callsStore.toggleVideo()"
         />
@@ -188,6 +220,10 @@ watch(localVideo, (el) => {
     </div>
 
     <!-- Hidden audio element for remote stream -->
-    <audio v-if="!isVideoCall" ref="remoteAudio" autoplay></audio>
+    <audio
+      v-if="!callsStore.isCallWithVideo"
+      ref="remoteAudio"
+      autoplay
+    ></audio>
   </div>
 </template>
