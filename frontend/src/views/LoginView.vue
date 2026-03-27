@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { useToast } from "@nuxt/ui/composables";
+import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { z } from "zod";
-import { useAuthStore } from "@/stores/auth";
-import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui";
 
 const router = useRouter();
 const authStore = useAuthStore();

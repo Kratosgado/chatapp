@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useToast } from "@nuxt/ui/composables";
 
 const toast = useToast();
 
