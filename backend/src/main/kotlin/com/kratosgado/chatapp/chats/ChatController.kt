@@ -9,6 +9,7 @@ import jakarta.validation.Valid
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -45,4 +46,10 @@ class ChatController(
         @PathVariable chatId: String,
         @RequestBody @Valid dto: SendMessageDto,
     ): MessageDto = chatService.sendMessage(userId, chatId, dto.content)
+
+    @DeleteMapping("/{chatId}")
+    fun deleteChat(
+        @AuthenticationPrincipal userId: String,
+        @PathVariable chatId: String,
+    ): String = chatService.deleteChat(userId, chatId)
 }

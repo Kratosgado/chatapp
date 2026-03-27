@@ -94,7 +94,7 @@ function getAvatar(message: Message) {
   >
     <!-- Chat Header -->
     <div
-      class="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white dark:bg-gray-900 shrink-0"
+      class="h-16 border-b border-muted flex items-center justify-between px-6 bg-white dark:bg-gray-900 shrink-0"
     >
       <div class="flex items-center gap-3">
         <UAvatar
@@ -117,13 +117,13 @@ function getAvatar(message: Message) {
       <div class="flex items-center gap-2">
         <UButton
           icon="i-heroicons-phone"
-          color="gray"
+          color="neutral"
           variant="ghost"
           @click="startCall"
         />
         <UButton
           icon="i-heroicons-information-circle"
-          color="gray"
+          color="neutral"
           variant="ghost"
         />
       </div>
@@ -182,11 +182,9 @@ function getAvatar(message: Message) {
     <TypingIndicator />
 
     <!-- Message Input -->
-    <div
-      class="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shrink-0"
-    >
+    <div class="p-4 border-t border-muted shrink-0">
       <div class="flex items-center gap-2">
-        <UButton icon="i-heroicons-paper-clip" color="gray" variant="ghost" />
+        <UButton icon="i-heroicons-paper-clip" color="neutral" variant="ghost" />
         <UInput
           v-model="newMessage"
           placeholder="Type a message..."
@@ -210,19 +208,10 @@ function getAvatar(message: Message) {
     </div>
   </div>
 
-  <!-- Empty State -->
-  <div
+  <UEmpty
     v-else
-    class="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-950 h-full"
-  >
-    <div class="text-center">
-      <UIcon
-        name="i-heroicons-chat-bubble-left-right"
-        class="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4"
-      />
-      <p class="text-gray-500 dark:text-gray-400">
-        Select a chat to start messaging
-      </p>
-    </div>
-  </div>
+    icon="lucide:chat-bubble-left-right"
+    title="No chats Selected"
+    description="Select a chat to start messaging"
+  />
 </template>

@@ -52,7 +52,7 @@ function formatTime(dateString: string) {
 <template>
   <div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="p-4 border-b border-gray-200 dark:border-gray-800">
+    <div class="p-4 border-b border-muted">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Chats</h2>
 
@@ -90,15 +90,30 @@ function formatTime(dateString: string) {
             <h3 class="font-semibold text-gray-900 dark:text-white truncate">
               {{ chat.name }}
             </h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+            <p class="text-sm text-muted truncate">
               <span v-if="chat.lastMessage?.sender.id === user?.id">You: </span>
               {{ getLastMessage(chat) }}
+              <span class="text-xs text-gray-400" v-if="chat.lastMessage"
+                >. {{ formatTime(chat.lastMessage.sentAt) }}</span
+              >
             </p>
           </div>
           <div class="flex flex-col items-end">
-            <span class="text-xs text-gray-400" v-if="chat.lastMessage">{{
-              formatTime(chat.lastMessage.sentAt)
-            }}</span>
+            <UDropdownMenu
+              v-if="chat.members.length > 1"
+              placement="bottom-end"
+              offset="0, 4"
+              :items="[
+                {
+                  label: 'Delete Chat',
+                  onSelect() {
+                    chatsStore.deleteChat(chat.id);
+                  },
+                },
+              ]"
+            >
+              <UButton icon="lucide:ellipsis-vertical" variant="ghost" />
+            </UDropdownMenu>
           </div>
         </div>
       </div>

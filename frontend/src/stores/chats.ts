@@ -11,6 +11,7 @@ import {
 import { useAuthStore } from "./auth";
 import { storeToRefs } from "pinia";
 import type { StompSubscription } from "@stomp/stompjs";
+import api from "@/services/api";
 
 export const useChatsStore = defineStore("chats", () => {
   const authStore = useAuthStore();
@@ -45,6 +46,13 @@ export const useChatsStore = defineStore("chats", () => {
       chats.value = await getChats();
     } finally {
       loading.value = false;
+    }
+  };
+
+  const deleteChat = async (chatId: string) => {
+    const res = await api.delete(`/chats/${chatId}`);
+    if (res.status === 200) {
+      chats.value = chats.value.filter((chat) => chat.id !== chatId);
     }
   };
 
@@ -132,6 +140,7 @@ export const useChatsStore = defineStore("chats", () => {
     chats,
     currentChat,
     messages,
+    deleteChat,
     loading,
     typingUsers,
     fetchChats,

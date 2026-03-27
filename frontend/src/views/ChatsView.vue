@@ -28,11 +28,11 @@ const isSidebarOpen = ref(false);
     <div class="flex-1 flex flex-col min-w-0 h-full relative">
       <!-- Mobile Header to toggle sidebar -->
       <div
-        class="md:hidden flex items-center p-4 border-b border-gray-200 dark:border-gray-800 shrink-0"
+        class="md:hidden flex items-center p-4 border-b border-muted shrink-0"
       >
         <UButton
           icon="i-heroicons-bars-3"
-          color="gray"
+          color="neutral"
           variant="ghost"
           @click="isSidebarOpen = true"
         />

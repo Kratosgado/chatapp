@@ -28,7 +28,7 @@ function handleLogout() {
 
 <template>
   <div
-    class="w-80 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900 h-full"
+    class="w-80 border-r border-muted flex flex-col bg-white dark:bg-gray-900 h-full"
   >
     <!-- Tabs -->
     <UTabs :items="items" class="flex-1 overflow-y-auto">
@@ -41,7 +41,7 @@ function handleLogout() {
     </UTabs>
 
     <!-- User Profile Footer -->
-    <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+    <div class="p-4 border-t border-muted">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3" v-if="user">
           <UAvatar
@@ -78,7 +78,7 @@ function handleLogout() {
         >
           <UButton
             icon="i-heroicons-ellipsis-vertical"
-            color="gray"
+            color="neutral"
             variant="ghost"
           />
         </UDropdownMenu>

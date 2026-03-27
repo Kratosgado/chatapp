@@ -50,7 +50,7 @@ async function handleSave() {
     <div class="max-w-3xl mx-auto">
       <div class="mb-6 flex items-center justify-between">
          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
-         <UButton icon="i-heroicons-arrow-left" color="gray" variant="ghost" @click="router.push('/chats')">Back to Chats</UButton>
+         <UButton icon="i-heroicons-arrow-left" color="neutral" variant="ghost" @click="router.push('/chats')">Back to Chats</UButton>
       </div>
 
       <UCard>
@@ -60,8 +60,8 @@ async function handleSave() {
         </template>
 
         <form @submit.prevent="handleSave" class="space-y-6">
-           <UAlert v-if="error" color="red" variant="soft" :title="error" icon="i-heroicons-exclamation-circle" />
-           <UAlert v-if="success" color="green" variant="soft" :title="success" icon="i-heroicons-check-circle" />
+           <UAlert v-if="error" color="error" variant="soft" :title="error" icon="i-heroicons-exclamation-circle" />
+           <UAlert v-if="success" color="success" variant="soft" :title="success" icon="i-heroicons-check-circle" />
 
            <div class="flex items-center gap-6">
               <UAvatar :src="avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}`" size="3xl" />

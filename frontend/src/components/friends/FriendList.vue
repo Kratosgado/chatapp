@@ -32,7 +32,7 @@ function handleReject(requestId: string) {
   <div class="flex flex-col h-full">
     <!-- Header -->
     <div
-      class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between"
+      class="p-4 border-b border-muted flex items-center justify-between"
     >
       <h2 class="text-xl font-bold text-gray-900 dark:text-white">Friends</h2>
 
@@ -42,7 +42,7 @@ function handleReject(requestId: string) {
     <!-- Requests -->
     <div
       v-if="requests.length > 0"
-      class="p-4 border-b border-gray-200 dark:border-gray-800"
+      class="p-4 border-b border-muted"
     >
       <h3 class="text-sm font-semibold text-gray-500 mb-2">Requests</h3>
       <div class="space-y-2">
@@ -63,14 +63,14 @@ function handleReject(requestId: string) {
             <UButton
               icon="i-heroicons-check"
               size="xs"
-              color="green"
+              color="success"
               variant="ghost"
               @click="handleAccept(req.id)"
             />
             <UButton
               icon="i-heroicons-x-mark"
               size="xs"
-              color="red"
+              color="error"
               variant="ghost"
               @click="handleReject(req.id)"
             />

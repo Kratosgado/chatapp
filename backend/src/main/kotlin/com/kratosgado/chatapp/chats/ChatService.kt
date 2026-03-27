@@ -29,7 +29,7 @@ class ChatService(
         if (participants.isEmpty()) throw ApiException.badRequest("Participants required")
 
         // In a real app, check for existing DM
-        val isGroup = participants.size > 1 || name != null
+        val isGroup = participants.size > 1 || !name.isNullOrEmpty()
         val chatRoom = ChatRoom(name = name, isGroup = isGroup)
         chatRoomRepo.save(chatRoom)
 
@@ -64,6 +64,18 @@ class ChatService(
             .findByChatRoomIdOrderBySentAtDesc(chatId, pageable)
             .content
             .map { MessageDto.fromEntity(it) }
+    }
+
+    fun deleteChat(userId: String, chatId: String): String {
+        val user = userRepo.getReferenceById(userId)
+        val chatRoom = chatRoomRepo.getReferenceById(chatId)
+
+        if (!chatRoomMemberRepo.existsByUserAndChatRoom(user, chatRoom)) {
+            throw ApiException.forbidden("Not a member")
+        }
+
+        chatRoomRepo.deleteById(chatId)
+        return "Chat deleted successfully"
     }
 
     @Transactional
