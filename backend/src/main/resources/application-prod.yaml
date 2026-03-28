@@ -8,6 +8,9 @@ server:
 spring:
   application:
     name: chatapp
+  main:
+    banner-mode: off
+    lazy-initialization: true
 
   datasource:
     url: ${DB_URL}
@@ -16,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: false
     open-in-view: false
 

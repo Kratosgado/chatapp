@@ -3,3 +3,9 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
+
+springdoc:
+  swagger-ui:
+    path: /docs
+  api-docs:
+    path: /v3/api-docs

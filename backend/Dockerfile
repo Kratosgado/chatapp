@@ -13,4 +13,5 @@ RUN useradd -m appuser
 USER appuser
 COPY --from=builder /app/build/libs/app.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx384m", "-Xms384m", "-jar", "app.jar"]

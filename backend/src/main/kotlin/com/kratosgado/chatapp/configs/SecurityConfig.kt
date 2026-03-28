@@ -20,20 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 class SecurityConfig {
     @Bean
-    fun userDetailsService(userRepo: UserRepo): UserDetailsService {
-        return UserDetailsService { email ->
-            val user = userRepo.findByEmail(email)
-                ?: throw UsernameNotFoundException("User not found")
-
-            org.springframework.security.core.userdetails.User
-                .withUsername(user.email)
-                .password(user.password)
-                .roles("USER")
-                .build()
-        }
-    }
-
-    @Bean
     fun filterChain(
         http: HttpSecurity,
         jwtAuthenticationFilter: JwtAuthenticationFilter,
@@ -43,15 +29,13 @@ class SecurityConfig {
             .cors { it.configurationSource(configurationSource()) }
             .authorizeHttpRequests { req ->
                 req
-                    .requestMatchers("/api/auth/**", "/docs/**", "/error")
+                    .requestMatchers("/api/auth/**", "/docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/error", "/health")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
-            }
-            .sessionManagement { session ->
+            }.sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }
@@ -59,11 +43,12 @@ class SecurityConfig {
     @Bean
     fun configurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "https://gachat-67v.pages.dev"
-        ) // Added frontend port
+        config.allowedOrigins =
+            listOf(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "https://gachat-67v.pages.dev",
+            ) // Added frontend port
         config.allowCredentials = true
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")

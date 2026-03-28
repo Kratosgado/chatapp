@@ -13,9 +13,11 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 
 @ControllerAdvice
-class ResponseWrapper(private val objectMapper: ObjectMapper) : ResponseBodyAdvice<Any> {
+class ResponseWrapper(
+    private val objectMapper: ObjectMapper,
+) : ResponseBodyAdvice<Any> {
     companion object {
-        private val IGNORED_PATHS = listOf("/docs/**", "/swagger-ui.html", "/swagger-ui/**")
+        private val IGNORED_PATHS = listOf("/docs/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/health")
     }
 
     override fun supports(
@@ -25,7 +27,7 @@ class ResponseWrapper(private val objectMapper: ObjectMapper) : ResponseBodyAdvi
         val attr = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
         if (attr != null) {
             val path = attr.request.requestURI
-            if (IGNORED_PATHS.contains(path)) return false
+            if (IGNORED_PATHS.any { path.startsWith(it.removeSuffix("/**")) }) return false
         }
 
         return returnType.parameterType != ApiResponse::class.java &&

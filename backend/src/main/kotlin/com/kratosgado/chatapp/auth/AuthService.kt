@@ -44,6 +44,7 @@ class AuthService(
         cookie.isHttpOnly = true
         cookie.secure = true
         cookie.path = "/"
+        cookie.setAttribute("SameSite", "None")
         cookie.maxAge = UtilConstants.ONE_DAY_IN_SECONDS
         res.addCookie(cookie)
 
@@ -66,6 +67,7 @@ class AuthService(
         cookie.isHttpOnly = true
         cookie.secure = true
         cookie.path = "/"
+        cookie.setAttribute("SameSite", "None")
         cookie.maxAge = UtilConstants.ONE_DAY_IN_SECONDS
         res.addCookie(cookie)
 
@@ -77,6 +79,7 @@ class AuthService(
         cookie.isHttpOnly = true
         cookie.secure = true
         cookie.path = "/"
+        cookie.setAttribute("SameSite", "None")
         cookie.maxAge = 0
         res.addCookie(cookie)
     }
