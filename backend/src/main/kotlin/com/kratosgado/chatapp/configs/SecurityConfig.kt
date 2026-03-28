@@ -59,7 +59,11 @@ class SecurityConfig {
     @Bean
     fun configurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("http://localhost:3000", "http://localhost:5173") // Added frontend port
+        config.allowedOrigins = listOf(
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://gachat-67v.pages.dev"
+        ) // Added frontend port
         config.allowCredentials = true
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")

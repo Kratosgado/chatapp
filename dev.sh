@@ -50,7 +50,7 @@ run)
 
     echo "Starting Backend (BootRun)..."
     # Run bootRun in background so we can wait for everything
-    (cd backend && ./gradlew bootRun) &
+    (cd backend && SEED=true ./gradlew bootRun) &
     PIDS+=($!)
   fi
 
