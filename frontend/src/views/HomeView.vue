@@ -38,7 +38,9 @@ const features = [
         </h1>
         <div class="flex gap-2">
           <template v-if="!authStore.isAuthenticated">
-            <UButton to="/login" variant="ghost" color="neutral">Log in</UButton>
+            <UButton to="/login" variant="ghost" color="neutral"
+              >Log in</UButton
+            >
             <UButton to="/register" color="primary">Sign up</UButton>
           </template>
           <template v-else>
@@ -106,6 +108,9 @@ const features = [
               :key="feature.title"
               spotlight
               class="text-center hover:shadow-lg transition-shadow"
+              :ui="{
+                header: 'w-full',
+              }"
             >
               <template #header>
                 <div class="flex justify-center mb-4">
@@ -126,9 +131,7 @@ const features = [
     </main>
 
     <!-- Footer -->
-    <footer
-      class="py-8 bg-gray-100 dark:bg-gray-900 border-t border-muted"
-    >
+    <footer class="py-8 bg-gray-100 dark:bg-gray-900 border-t border-muted">
       <UContainer class="text-center text-gray-500 text-sm">
         &copy; {{ new Date().getFullYear() }} ChatApp. All rights reserved.
       </UContainer>
