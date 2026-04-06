@@ -29,7 +29,9 @@ class WebSocketConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry
             .addEndpoint("/ws")
-            .setAllowedOrigins("http://localhost:3000", "http://localhost:5173")
+            .setAllowedOrigins(
+                "http://localhost:3000", "https://gachat-67v.pages.dev", "http://localhost:5173"
+            )
             .withSockJS()
     }
 
